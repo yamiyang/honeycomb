@@ -1,7 +1,7 @@
 # 🐝 HoneyComb 蜜探智能探索工具
 
 <div align="center">
-  <span style="font-size: 80px; display: inline-block; margin-bottom: 20px;">🐝</span><br>
+  <img src="./public/logo.png" width="120" height="120" alt="HoneyComb Logo"><br><br>
   <b>欢迎来到 HoneyComb！你的专属小蜜蜂智能采蜜团队 🌻</b>
   <p>还在苦苦搜寻资料吗？派出你的 AI 蜜蜂大军，帮你把全网的「知识花蜜」一滴不漏地带回蜂巢！</p>
 
