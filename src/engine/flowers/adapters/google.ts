@@ -24,6 +24,18 @@ export const googleAdapter: FlowerAdapter = {
   async search(query: string, config: SourceConfig, options?: SearchOptions): Promise<SourceResult[]> {
     const maxResults = options?.maxResults || config.maxResults || 10;
     
+    // 没有 API Key 时提示用户使用替代方案
+    if (!config.apiKey) {
+      throw new Error(
+        "Google Search 需要 Serper API Key。" +
+        "如果申请不了，推荐使用以下免费替代方案：\n" +
+        "• 🦆 DuckDuckGo — 完全免费，无需 Key\n" +
+        "• 🔎 Searx — 聚合 Google/Bing 结果，无需 Key\n" +
+        "• 🦁 Brave Search — 免费 2000次/月（https://brave.com/search/api/）\n" +
+        "请在花田面板中激活这些替代搜索引擎。"
+      );
+    }
+    
     // 优先使用 Serper API (更简单)
     if (config.baseUrl?.includes("serper") || !config.searchParams?.cx) {
       return searchViaSerper(query, config, maxResults, options);

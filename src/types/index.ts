@@ -19,6 +19,10 @@ export type SourceType =
   | "reddit"
   | "hackernews"
   | "youtube"
+  | "wikipedia"
+  | "stackoverflow"
+  | "duckduckgo"
+  | "bilibili"
   | "web"        // 通用网页爬取
   | "rss"
   | "custom";
@@ -63,6 +67,7 @@ export interface SourceConfig {
   apiSecret?: string;
   baseUrl?: string;
   bearerToken?: string;
+  cookie?: string;                          // Cookie 认证（如 Twitter/X）
   customHeaders?: Record<string, string>;
   searchParams?: Record<string, string>;    // 默认搜索参数
   maxResults?: number;

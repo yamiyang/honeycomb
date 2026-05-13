@@ -70,7 +70,7 @@ export default function FlowerFieldPanel() {
       {/* Footer */}
       <div className="p-3 border-t border-honey-100 bg-white">
         <p className="text-[11px] text-honey-800/40 text-center font-bold">
-          💡 arXiv、Hacker News、Reddit、GitHub、Web Crawler、RSS 无需 API Key 即可采蜜
+          💡 arXiv、Hacker News、Reddit、Wikipedia、StackOverflow、DuckDuckGo、Searx、RSS 无需 API Key 即可采蜜
         </p>
       </div>
     </div>
@@ -156,7 +156,7 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
               onClick={onEdit}
               className="text-xs text-honey-600 hover:text-honey-500 font-bold flex items-center gap-1 bg-honey-50 px-3 py-1.5 rounded-full transition-colors"
             >
-              {source.config.apiKey || source.config.bearerToken ? "✓ 已配置 · 修改" : "⚙️ 配置 API Key"}
+              {source.config.apiKey || source.config.bearerToken || source.config.cookie ? "✓ 已配置 · 修改" : "⚙️ 配置认证"}
             </button>
           ) : (
             <AnimatePresence>
@@ -171,13 +171,36 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
                     <label className="text-xs text-bee-dark/60 block mb-1.5 font-bold ml-1">
                       {field.label}
                     </label>
-                    <input
-                      type={field.type || "text"}
-                      placeholder={field.placeholder}
-                      value={tempConfig[field.key] || (source.config as Record<string, string>)[field.key] || ""}
-                      onChange={(e) => onConfigChange(field.key, e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-xl border border-honey-200 bg-white focus:outline-none focus:border-honey-400 shadow-sm transition-colors"
-                    />
+                    {field.multiline ? (
+                      <textarea
+                        placeholder={field.placeholder}
+                        value={tempConfig[field.key] || (source.config as Record<string, string>)[field.key] || ""}
+                        onChange={(e) => onConfigChange(field.key, e.target.value)}
+                        rows={3}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-honey-200 bg-white focus:outline-none focus:border-honey-400 shadow-sm transition-colors resize-none font-mono text-[11px]"
+                      />
+                    ) : (
+                      <input
+                        type={field.type || "text"}
+                        placeholder={field.placeholder}
+                        value={tempConfig[field.key] || (source.config as Record<string, string>)[field.key] || ""}
+                        onChange={(e) => onConfigChange(field.key, e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-honey-200 bg-white focus:outline-none focus:border-honey-400 shadow-sm transition-colors"
+                      />
+                    )}
+                    {field.applyUrl && (
+                      <a
+                        href={field.applyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-blue-500 hover:text-blue-600 mt-1 inline-flex items-center gap-0.5 ml-1"
+                      >
+                        🔗 {field.applyLabel || "申请 Key"}
+                      </a>
+                    )}
+                    {field.helpText && (
+                      <p className="text-[10px] text-bee-dark/40 mt-1 ml-1">{field.helpText}</p>
+                    )}
                   </div>
                 ))}
                 <div className="flex gap-2 justify-end mt-3">
@@ -206,7 +229,7 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
 // ─── Helpers ───
 
 function requiresApiKey(type: SourceType): boolean {
-  return ["google", "twitter", "scholar", "youtube"].includes(type);
+  return ["google", "twitter", "scholar", "youtube", "github", "web", "stackoverflow", "rss"].includes(type);
 }
 
 function capabilityLabel(cap: string): string {
@@ -229,22 +252,90 @@ interface ConfigField {
   label: string;
   placeholder: string;
   type?: string;
+  multiline?: boolean;
+  applyUrl?: string;
+  applyLabel?: string;
+  helpText?: string;
 }
 
 function getConfigFields(type: SourceType): ConfigField[] {
   switch (type) {
     case "google":
-      return [{ key: "apiKey", label: "Serper API Key (serper.dev)", placeholder: "输入 API Key...", type: "password" }];
+      return [{
+        key: "apiKey",
+        label: "Serper API Key",
+        placeholder: "输入 Serper API Key...",
+        type: "password",
+        applyUrl: "https://serper.dev/",
+        applyLabel: "去 serper.dev 免费申请",
+        helpText: "免费额度 2500 次/月",
+      }];
     case "twitter":
-      return [{ key: "bearerToken", label: "Twitter Bearer Token", placeholder: "输入 Bearer Token...", type: "password" }];
+      return [{
+        key: "cookie",
+        label: "Twitter/X Cookie",
+        placeholder: "从浏览器复制完整 Cookie...",
+        multiline: true,
+        helpText: "登录 x.com → F12 → Network → 任意请求 → 复制 Cookie 头的值（需包含 ct0 和 auth_token）",
+      }];
     case "github":
-      return [{ key: "apiKey", label: "GitHub Token (可选)", placeholder: "ghp_...", type: "password" }];
+      return [{
+        key: "apiKey",
+        label: "GitHub Personal Access Token（可选，提高速率限制）",
+        placeholder: "ghp_...",
+        type: "password",
+        applyUrl: "https://github.com/settings/tokens/new",
+        applyLabel: "去 GitHub 生成 Token",
+        helpText: "不配置也能用，但有 60次/小时 的限制",
+      }];
     case "scholar":
-      return [{ key: "apiKey", label: "SerpAPI Key (serpapi.com)", placeholder: "输入 API Key...", type: "password" }];
+      return [{
+        key: "apiKey",
+        label: "SerpAPI Key",
+        placeholder: "输入 SerpAPI Key...",
+        type: "password",
+        applyUrl: "https://serpapi.com/manage-api-key",
+        applyLabel: "去 serpapi.com 免费申请",
+        helpText: "免费额度 100 次/月，不配置则使用 CrossRef 替代",
+      }];
     case "youtube":
-      return [{ key: "apiKey", label: "YouTube Data API Key", placeholder: "输入 API Key...", type: "password" }];
+      return [{
+        key: "apiKey",
+        label: "YouTube Data API v3 Key",
+        placeholder: "输入 API Key...",
+        type: "password",
+        applyUrl: "https://console.cloud.google.com/apis/credentials",
+        applyLabel: "去 Google Cloud Console 申请",
+        helpText: "需开启 YouTube Data API v3，免费额度 10000 单位/天",
+      }];
+    case "stackoverflow":
+      return [{
+        key: "apiKey",
+        label: "StackExchange API Key（可选，提高速率限制）",
+        placeholder: "输入 API Key...",
+        type: "password",
+        applyUrl: "https://stackapps.com/apps/oauth/register",
+        applyLabel: "去 StackApps 免费注册",
+        helpText: "不配置也能用（300次/天），配置后 10000次/天",
+      }];
     case "web":
-      return [{ key: "apiKey", label: "Jina API Key (可选)", placeholder: "jina_...", type: "password" }];
+      return [{
+        key: "apiKey",
+        label: "Jina API Key（可选，增强爬取能力）",
+        placeholder: "jina_...",
+        type: "password",
+        applyUrl: "https://jina.ai/reader/",
+        applyLabel: "去 jina.ai 免费申请",
+        helpText: "不配置则使用 DuckDuckGo 免费搜索",
+      }];
+    case "rss":
+      return [{
+        key: "feeds",
+        label: "RSS 订阅地址（可选，逗号分隔）",
+        placeholder: "https://example.com/feed.xml, https://blog.example.com/rss",
+        multiline: true,
+        helpText: "不配置则使用默认源（HN、Ars Technica、The Verge、GitHub Blog 等）",
+      }];
     default:
       return [];
   }

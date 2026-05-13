@@ -13,6 +13,14 @@ import { scholarAdapter } from "./scholar";
 import { hackernewsAdapter } from "./hackernews";
 import { redditAdapter } from "./reddit";
 import { webAdapter } from "./web";
+import { wikipediaAdapter } from "./wikipedia";
+import { stackoverflowAdapter } from "./stackoverflow";
+import { youtubeAdapter } from "./youtube";
+import { duckduckgoAdapter } from "./duckduckgo";
+import { bilibiliAdapter } from "./bilibili";
+import { rssAdapter } from "./rss";
+import { searxAdapter } from "./searx";
+import { braveAdapter } from "./brave";
 
 /**
  * 注册所有内置适配器
@@ -26,6 +34,14 @@ export function registerAllAdapters() {
   flowerField.registerAdapter(hackernewsAdapter);
   flowerField.registerAdapter(redditAdapter);
   flowerField.registerAdapter(webAdapter);
+  flowerField.registerAdapter(wikipediaAdapter);
+  flowerField.registerAdapter(stackoverflowAdapter);
+  flowerField.registerAdapter(youtubeAdapter);
+  flowerField.registerAdapter(duckduckgoAdapter);
+  flowerField.registerAdapter(bilibiliAdapter);
+  flowerField.registerAdapter(rssAdapter);
+  flowerField.registerAdapter(searxAdapter);
+  flowerField.registerAdapter(braveAdapter);
 }
 
 export {
@@ -37,4 +53,12 @@ export {
   hackernewsAdapter,
   redditAdapter,
   webAdapter,
+  wikipediaAdapter,
+  stackoverflowAdapter,
+  youtubeAdapter,
+  duckduckgoAdapter,
+  bilibiliAdapter,
+  rssAdapter,
+  searxAdapter,
+  braveAdapter,
 };
