@@ -45,6 +45,35 @@ export default function ResearchDetailPage() {
     return () => setActiveResearch(null);
   }, [id, setActiveResearch]);
 
+  // 刷新恢复：如果上次报告生成被中断（状态还是 reporting），自动重试
+  useEffect(() => {
+    if (!research) return;
+    if (research.status === "reporting" && !isProcessing) {
+      const allFindings = research.bees.flatMap(b => b.findings);
+      if (allFindings.length > 0) {
+        setIsProcessing(true);
+        const hermes = getHermes();
+        const currentResearch = useResearchStore.getState().researches.find(r => r.id === id);
+        addMessage(id, { role: "system", content: "⏳ 检测到上次报告生成被中断，正在恢复..." });
+        hermes.generateReport(
+          research.objective,
+          allFindings,
+          currentResearch?.graph || research.graph,
+          currentResearch?.roundSummaries || [],
+        ).then(report => {
+          setReport(id, report);
+          addMessage(id, { role: "system", content: "✅ 报告已重新生成，请查看右侧「采蜜报告」标签。" });
+        }).catch(err => {
+          addMessage(id, { role: "system", content: `⚠️ 报告恢复失败: ${err instanceof Error ? err.message : "未知错误"}` });
+          useResearchStore.getState().updateResearchStatus(id, "completed");
+        }).finally(() => {
+          setIsProcessing(false);
+        });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
     const handleSend = useCallback(
     async (text: string) => {
       if (!research || isProcessing) return;
@@ -133,6 +162,7 @@ export default function ResearchDetailPage() {
             addMessage(id, { role: "queen", content: "🐝 蜂巢里还没有花蜜呢，我得先派蜜蜂去采集信息才能酿报告哦~" });
           } else {
             addMessage(id, { role: "system", content: `⏳ 正在调用报告引擎${focus ? `（聚焦：${focus}）` : ""}，预计需要 30-60 秒...` });
+            useResearchStore.getState().updateResearchStatus(id, "reporting");
             try {
               const currentResearch = useResearchStore.getState().researches.find(r => r.id === id);
               const report = await hermes.generateReport(

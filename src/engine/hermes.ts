@@ -17,6 +17,7 @@
    ============================================================ */
 
 import type { HermesConfig, HermesMessage, HermesTool, HermesToolCall, SearchTask, SourceResult, Finding, KnowledgeNode, KnowledgeEdge } from "@/types";
+import { HC_CITE_SCRIPT } from "./cite-component";
 
 // ─────────────────────────────────────────────
 // 默认配置 — 蜂后（Queen）: 强推理模型
@@ -1017,6 +1018,24 @@ type 可选值:
 - **绝对不要**在 HTML 前后加任何说明文字
 - 第一个字符必须是 <
 
+## 📎 引用标注组件 <hc-cite>
+
+报告中已内置了一个 \`<hc-cite>\` Web Component。当你引用某条情报的数据时，**必须**用它来标注来源：
+
+\`\`\`html
+<hc-cite source="信息源名称" url="来源URL" detail="引用的具体原文或摘要">被引用的文字内容</hc-cite>
+\`\`\`
+
+示例：
+<hc-cite source="DuckDuckGo" url="https://example.com/article" detail="该研究显示 AI CAD 市场规模在 2025 年预计达到 50 亿美元">AI CAD 市场规模将达 50 亿美元</hc-cite>
+
+使用原则：
+- 每个关键数据、具体案例、核心论断都应该用 <hc-cite> 标注
+- source 填写信息源名称（如 DuckDuckGo、Web Search、RSS 等）
+- url 填写原始文章链接
+- detail 填写更完整的引用上下文（比展示文字更详细）
+- 被包裹的文字是用户直接看到的（简短有力），hover 时才看到 detail 完整内容
+
 用中文撰写。`;
 
     const context = `研究目标: ${objective}
@@ -1081,8 +1100,18 @@ ${roundSummaries.map(r => `第${r.round}轮: ${r.keyDiscoveries.join("; ")}`).jo
     // 1. 直接输出完整 HTML
     // 2. ```html ... ``` 代码块包裹
     // 3. 代码块前后带有说明文字
-    const { html, preamble } = this.extractHtmlReport(rawReport, objective);
+    const { html: rawHtml, preamble } = this.extractHtmlReport(rawReport, objective);
     
+    // 注入 <hc-cite> Web Component 脚本到 HTML 中
+    let html = rawHtml;
+    if (html.includes("</body>")) {
+      html = html.replace("</body>", `${HC_CITE_SCRIPT}</body>`);
+    } else if (html.includes("</html>")) {
+      html = html.replace("</html>", `${HC_CITE_SCRIPT}</html>`);
+    } else {
+      html = html + HC_CITE_SCRIPT;
+    }
+
     // 如果有代码块外的说明文字，嵌入到 HTML 的 data 属性中供前端展示
     if (preamble) {
       // 把 preamble 用 base64 编码后注入到 HTML 标签上
@@ -1281,6 +1310,7 @@ ${roundSummaries.map(r => `第${r.round}轮: ${r.keyDiscoveries.join("; ")}`).jo
 <body>
 ${body}
 <div class="footer">🐝 Powered by HoneyComb 蜜探</div>
+${HC_CITE_SCRIPT}
 </body>
 </html>`;
   }

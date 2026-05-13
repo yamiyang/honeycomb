@@ -133,7 +133,7 @@ function HtmlReportViewer({ html }: { html: string }) {
         <iframe
           ref={iframeRef}
           srcDoc={html}
-          sandbox="allow-same-origin allow-popups"
+          sandbox="allow-same-origin allow-popups allow-scripts"
           className="w-full h-full bg-white rounded-[22px]"
           title="采蜜报告"
         />

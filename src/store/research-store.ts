@@ -559,6 +559,47 @@ export const useResearchStore = create<ResearchStore>()(
           researches: state?.researches ?? [],
         };
       },
+      storage: {
+        getItem: (name) => {
+          if (typeof window === "undefined") return null;
+          try {
+            const raw = localStorage.getItem(name);
+            return raw ? JSON.parse(raw) : null;
+          } catch (err) {
+            console.error("[Store] Failed to read from localStorage:", err);
+            return null;
+          }
+        },
+        setItem: (name, value) => {
+          if (typeof window === "undefined") return;
+          try {
+            const serialized = JSON.stringify(value);
+            localStorage.setItem(name, serialized);
+          } catch (err) {
+            console.error("[Store] ⚠️ localStorage write failed (likely quota exceeded):", err);
+            console.warn("[Store] Data size:", JSON.stringify(value).length, "bytes");
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const trimmed = JSON.parse(JSON.stringify(value)) as any;
+              if (trimmed?.state?.researches) {
+                for (const r of trimmed.state.researches) {
+                  if (r.messages && r.messages.length > 50) {
+                    r.messages = r.messages.slice(-50);
+                  }
+                }
+              }
+              localStorage.setItem(name, JSON.stringify(trimmed));
+              console.log("[Store] Saved with trimmed messages");
+            } catch {
+              console.error("[Store] Even trimmed save failed. Data will be lost on refresh.");
+            }
+          }
+        },
+        removeItem: (name) => {
+          if (typeof window === "undefined") return;
+          localStorage.removeItem(name);
+        },
+      },
       onRehydrateStorage: () => () => {
         // persist 水合完成，花田数据由 initFlowerField() API 调用加载，
         // 这里不再做花田相关的初始化。
