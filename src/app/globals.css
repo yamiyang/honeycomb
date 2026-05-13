@@ -1,305 +1,226 @@
 @import "tailwindcss";
 
 @theme {
-  /* 🎮 Pixel Game BeeHive Color System */
-  --color-honey-50: #fffef5;
-  --color-honey-100: #fff8d6;
+  /* 🐝 Cute HoneyColor System */
+  --color-honey-50: #fffdf2;
+  --color-honey-100: #fff9d6;
   --color-honey-200: #ffecaa;
-  --color-honey-300: #ffdd6b;
-  --color-honey-400: #ffc83a;
-  --color-honey-500: #ffb300;
-  --color-honey-600: #e09800;
-  --color-honey-700: #b07500;
-  --color-honey-800: #7d5200;
-  --color-honey-900: #4a3000;
+  --color-honey-300: #ffe07a;
+  --color-honey-400: #ffcc45;
+  --color-honey-500: #fdb022;
+  --color-honey-600: #e08d0b;
+  --color-honey-700: #b06203;
+  --color-honey-800: #8c4c08;
+  --color-honey-900: #73400b;
 
-  --color-bee-dark: #2d1f00;
-  --color-bee-brown: #8b6914;
-  --color-bee-stripe: #2c2000;
+  --color-bee-dark: #3b2c15;
+  --color-bee-brown: #8f683a;
+  --color-bee-stripe: #261b0c;
 
-  --color-pollen-green: #6dce56;
-  --color-pollen-pink: #ff8fab;
-  --color-sky-blue: #64d2ff;
+  --color-pollen-green: #a7f3d0;
+  --color-pollen-pink: #fbcfe8;
+  --color-sky-blue: #bae6fd;
 
-  --color-comb-bg: #fffcf0;
-  --color-comb-border: #ffd34e;
-  --color-comb-hover: #fff0b8;
+  --color-comb-bg: #fffcf2;
+  --color-comb-border: #fde68a;
+  --color-comb-hover: #fef08a;
 
-  --color-pixel-shadow: #1a1000;
-  --color-pixel-highlight: #fff6d0;
-  --color-grass-green: #4ade80;
-  --color-pixel-purple: #c084fc;
-  --color-pixel-red: #fb7185;
-  --color-pixel-blue: #60a5fa;
-
-  --font-sans: "SF Mono", "Fira Code", "Cascadia Code", "JetBrains Mono", "Source Code Pro", "Menlo", "Monaco", "Consolas", "Courier New", monospace;
-  --font-mono: "SF Mono", "Fira Code", "Cascadia Code", "JetBrains Mono", "Source Code Pro", "Menlo", "Monaco", "Consolas", "Courier New", monospace;
-  --font-pixel: "SF Mono", "Fira Code", "Cascadia Code", "JetBrains Mono", "Source Code Pro", "Menlo", "Monaco", "Consolas", "Courier New", monospace;
+  --font-sans: "Quicksand", "Nunito", "SF Pro Rounded", system-ui, sans-serif;
+  --font-mono: "Fira Code", monospace;
 }
 
 /* Base styles */
 html {
   font-family: var(--font-sans);
-  image-rendering: pixelated;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
   background: var(--color-honey-50);
   color: var(--color-bee-dark);
-  background-image:
-    radial-gradient(circle at 20% 80%, rgba(255,179,0,0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(109,206,86,0.06) 0%, transparent 50%);
 }
 
-/* ═══════ PIXEL ART UTILITIES ═══════ */
+/* ═══════ CUTE UTILITIES ═══════ */
 
-/* Pixel box shadow (8-bit style) */
-.pixel-border {
-  border: 3px solid var(--color-bee-dark);
-  box-shadow:
-    3px 3px 0px var(--color-pixel-shadow),
-    inset 1px 1px 0px var(--color-pixel-highlight);
-}
-
-.pixel-border-sm {
-  border: 2px solid var(--color-bee-dark);
-  box-shadow: 2px 2px 0px var(--color-pixel-shadow);
+.cute-card {
+  background: white;
+  border-radius: 24px;
+  border: 2px solid var(--color-honey-100);
+  box-shadow: 0 4px 20px -4px rgba(253, 176, 34, 0.1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.pixel-border-honey {
-  border: 3px solid var(--color-honey-600);
-  box-shadow:
-    3px 3px 0px var(--color-honey-800),
-    inset 1px 1px 0px var(--color-honey-300);
+.cute-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(253, 176, 34, 0.15);
+  border-color: var(--color-honey-200);
 }
 
-.pixel-btn {
-  border: 3px solid var(--color-bee-dark);
-  box-shadow: 3px 3px 0px var(--color-pixel-shadow);
-  transition: all 0.1s;
-  image-rendering: pixelated;
-}
-.pixel-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px var(--color-pixel-shadow);
-}
-.pixel-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px var(--color-pixel-shadow);
+.cute-btn {
+  border-radius: 9999px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-weight: 700;
+  border: 2px solid transparent;
 }
 
-/* ═══════ SCROLLBAR (Pixel Style) ═══════ */
+.cute-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.05);
+}
+
+.cute-btn:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+.cute-tag {
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border: 2px solid transparent;
+}
+
+.cute-header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--color-honey-100);
+  color: var(--color-bee-dark);
+}
+
+/* ═══════ SCROLLBAR (Soft Style) ═══════ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-honey-100);
-  border-left: 2px solid var(--color-honey-300);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-honey-400);
-  border: 2px solid var(--color-honey-600);
+  background: var(--color-honey-200);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-honey-500);
+  background: var(--color-honey-300);
 }
 
-/* ═══════ HEXAGON ═══════ */
-.clip-hexagon {
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+/* ═══════ HEXAGON (SVG-based) ═══════ */
+.hex-cell {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hex-cell:hover {
+  filter: brightness(1.05);
 }
 
 /* ═══════ ANIMATIONS ═══════ */
+@keyframes bee-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-3deg); }
+  50% { transform: translateY(0px) rotate(0deg); }
+  75% { transform: translateY(4px) rotate(3deg); }
+}
 
-/* Pixel bee bounce */
-@keyframes pixel-bounce {
+@keyframes gentle-bounce {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-6px); }
 }
 
-/* Bee float (game style) */
-@keyframes bee-float {
-  0%, 100% { transform: translateY(0px); }
-  25% { transform: translateY(-5px); }
-  50% { transform: translateY(-2px); }
-  75% { transform: translateY(-7px); }
-}
-
-/* Star sparkle effect */
-@keyframes sparkle {
-  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1) rotate(180deg); }
-}
-
-/* Honey drip */
-@keyframes honey-drip {
-  0%, 100% { transform: translateY(0) scaleY(1); }
-  50% { transform: translateY(2px) scaleY(1.1); }
-}
-
-/* Pixel pulse (8-bit heartbeat) */
-@keyframes pixel-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
-/* Game progress bar fill */
-@keyframes progress-fill {
-  0% { width: 0%; }
-  100% { width: 100%; }
-}
-
-/* Float in from below */
-@keyframes float-up {
-  0% { transform: translateY(10px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-/* Walking pixel bee */
-@keyframes bee-walk {
-  0%, 100% { transform: translateX(0) scaleX(1); }
-  25% { transform: translateX(3px) scaleX(1); }
-  50% { transform: translateX(0) scaleX(-1); }
-  75% { transform: translateX(-3px) scaleX(-1); }
-}
-
-/* Grass wave */
-@keyframes grass-wave {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .animate-bee-float {
-  animation: bee-float 2s ease-in-out infinite;
+  animation: bee-float 3s ease-in-out infinite;
 }
 
-.animate-pixel-bounce {
-  animation: pixel-bounce 0.8s ease-in-out infinite;
+.animate-pop-in {
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-.animate-pixel-pulse {
-  animation: pixel-pulse 1.5s ease-in-out infinite;
-}
-
-.animate-sparkle {
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-.animate-grass-wave {
-  animation: grass-wave 3s ease-in-out infinite;
-  transform-origin: bottom center;
-}
-
-/* ═══════ CHAT BUBBLES (Pixel RPG Style) ═══════ */
-
+/* ═══════ CHAT BUBBLES (Soft Rounded) ═══════ */
 .chat-bubble-user {
-  background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
+  background: linear-gradient(135deg, var(--color-honey-300), var(--color-honey-400));
   color: var(--color-bee-dark);
-  border: 2px solid var(--color-honey-700);
-  border-radius: 2px;
-  box-shadow: 2px 2px 0px var(--color-honey-800);
-  position: relative;
+  border-radius: 20px 20px 4px 20px;
+  box-shadow: 0 4px 12px -2px rgba(253, 176, 34, 0.2);
 }
 
 .chat-bubble-agent {
-  background: linear-gradient(180deg, #ffffff 0%, #fff8d6 100%);
-  border: 2px solid var(--color-honey-400);
+  background: white;
+  border: 2px solid var(--color-honey-100);
   color: var(--color-bee-dark);
-  border-radius: 2px;
-  box-shadow: 2px 2px 0px var(--color-honey-600);
+  border-radius: 20px 20px 20px 4px;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.03);
 }
 
-/* ═══════ PIXEL CARD ═══════ */
-.pixel-card {
-  background: linear-gradient(180deg, #ffffff 0%, #fffef5 100%);
-  border: 3px solid var(--color-bee-dark);
-  box-shadow:
-    4px 4px 0px var(--color-pixel-shadow),
-    inset 2px 2px 0px var(--color-pixel-highlight);
-  image-rendering: pixelated;
+.chat-bubble-agent.bg-red-50 {
+  background: #fef2f2;
+  border-color: #fecaca;
 }
 
-.pixel-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow:
-    6px 6px 0px var(--color-pixel-shadow),
-    inset 2px 2px 0px var(--color-pixel-highlight);
+/* ═══════ MARKDOWN ═══════ */
+.markdown-body {
+  word-break: break-word;
 }
-
-/* ═══════ GAME HUD ═══════ */
-.game-hud {
-  background: linear-gradient(180deg, #2d1f00 0%, #1a1000 100%);
-  border: 3px solid var(--color-honey-500);
-  box-shadow: 
-    inset 0 1px 0 var(--color-honey-300),
-    0 3px 0 var(--color-pixel-shadow);
-  color: var(--color-honey-300);
+.markdown-body p {
+  margin-bottom: 0.5em;
 }
-
-/* ═══════ PIXEL TAG ═══════ */
-.pixel-tag {
-  border: 2px solid;
-  font-family: var(--font-pixel);
-  font-size: 10px;
-  padding: 1px 6px;
-  image-rendering: pixelated;
+.markdown-body p:last-child {
+  margin-bottom: 0;
 }
-
-/* ═══════ HEXAGON GRID (SVG-based, no clip-path) ═══════ */
-.hex-cell {
-  transition: all 0.2s;
-  image-rendering: pixelated;
+.markdown-body ul, .markdown-body ol {
+  padding-left: 1.25em;
+  margin-bottom: 0.5em;
 }
-
-.hex-cell:hover {
-  filter: brightness(1.15);
+.markdown-body ul {
+  list-style-type: disc;
 }
-
-/* ═══════ GAME GROUND / TERRAIN ═══════ */
-.game-ground {
-  background: 
-    linear-gradient(180deg, 
-      transparent 0%, 
-      transparent 60%, 
-      #90c95c 60%, 
-      #7db84e 65%, 
-      #6daa40 100%
-    );
+.markdown-body ol {
+  list-style-type: decimal;
 }
-
-/* Grass decorations */
-.pixel-grass::before {
-  content: "🌱";
-  position: absolute;
-  bottom: 0;
-  font-size: 12px;
-  animation: grass-wave 2s ease-in-out infinite;
+.markdown-body li {
+  margin-bottom: 0.25em;
 }
-
-/* ═══════ NODE GLOW (Game item glow) ═══════ */
-.node-glow {
-  filter: drop-shadow(0 0 4px rgba(255, 179, 0, 0.8));
+.markdown-body a {
+  color: var(--color-honey-700);
+  text-decoration: underline;
+  text-decoration-color: var(--color-honey-300);
+  text-underline-offset: 2px;
+}
+.markdown-body code {
+  background: rgba(0,0,0,0.05);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.markdown-body pre {
+  background: rgba(0,0,0,0.03);
+  padding: 0.75em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 0.5em;
+}
+.markdown-body pre code {
+  background: none;
+  padding: 0;
+}
+.markdown-body strong {
+  font-weight: 800;
+  color: var(--color-honey-900);
+}
+.markdown-body blockquote {
+  border-left: 3px solid var(--color-honey-300);
+  padding-left: 0.75em;
+  color: var(--color-bee-dark);
+  opacity: 0.8;
+  margin-bottom: 0.5em;
 }
 
 /* ═══════ REPORT FRAME ═══════ */
 .report-frame {
-  border: 3px solid var(--color-bee-dark);
-  box-shadow: 4px 4px 0px var(--color-pixel-shadow);
   background: white;
-}
-
-/* ═══════ SCANLINE OVERLAY (CRT effect) ═══════ */
-.scanlines::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
-  );
-  pointer-events: none;
+  border-radius: 24px;
+  border: 2px solid var(--color-honey-100);
+  box-shadow: 0 8px 30px -4px rgba(0,0,0,0.05);
 }

@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 Argus — Global Research Store (Zustand)
+   🐝 BeeSearch — Global Research Store (Zustand)
    
    管理：研究项目、蜜蜂状态、知识图谱、信息源配置
    ============================================================ */
@@ -533,7 +533,7 @@ export const useResearchStore = create<ResearchStore>()(
       clearEvents: () => set({ events: [] }),
     }),
     {
-      name: "argus-research-store",
+      name: "beesearch-research-store",
       version: 5, // v5: 知识图谱去重合并 + 蜜蜂复用机制
       partialize: (state) => ({
         researches: state.researches,

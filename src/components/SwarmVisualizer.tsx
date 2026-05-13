@@ -41,13 +41,13 @@ const nodeEmoji: Record<string, string> = {
 };
 
 const nodeColor: Record<string, { fill: string; stroke: string }> = {
-  concept: { fill: "#fff8d6", stroke: "#FFB300" },
-  entity: { fill: "#fff0e0", stroke: "#FF8F00" },
-  fact: { fill: "#e8fbe4", stroke: "#6DCE56" },
-  insight: { fill: "#ffe8f0", stroke: "#FF6B9D" },
-  source: { fill: "#e4f5ff", stroke: "#64D2FF" },
-  question: { fill: "#f0e8ff", stroke: "#C084FC" },
-  contradiction: { fill: "#ffe8ec", stroke: "#FB7185" },
+  concept: { fill: "#fff9d6", stroke: "#ffcc45" },
+  entity: { fill: "#fff1e5", stroke: "#fb923c" },
+  fact: { fill: "#ecfdf5", stroke: "#34d399" },
+  insight: { fill: "#fdf2f8", stroke: "#f472b6" },
+  source: { fill: "#eff6ff", stroke: "#38bdf8" },
+  question: { fill: "#f5f3ff", stroke: "#c084fc" },
+  contradiction: { fill: "#fef2f2", stroke: "#fb7185" },
 };
 
 const nodeTypeNames: Record<string, string> = {
@@ -61,12 +61,12 @@ const nodeTypeNames: Record<string, string> = {
 };
 
 /* ── Flat-top hexagon math ── */
-const HEX_SIZE = 28; // radius from center to vertex
+const HEX_SIZE = 32; // radius from center to vertex
 const HEX_W = HEX_SIZE * 2;
 const HEX_H = HEX_SIZE * Math.sqrt(3);
 
 /** Generate flat-top hexagon points string for SVG polygon */
-function hexPoints(cx: number, cy: number, r: number): string {
+function hexPoints(cx: number, cy: number, r: number, cornerRadius = 4): string {
   const pts: string[] = [];
   for (let i = 0; i < 6; i++) {
     const angle = (Math.PI / 3) * i;
@@ -117,12 +117,13 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
   const activeBees = bees.filter((b) => b.status !== "retired");
   const retiredCount = bees.length - activeBees.length;
   const [selectedNode, setSelectedNode] = useState<KnowledgeNode | null>(null);
+  const [hoverData, setHoverData] = useState<{ type: "bee" | "node", data: BeeAgent | KnowledgeNode, x: number, y: number } | null>(null);
 
   // Build cells: center hive → bees → knowledge nodes → empty fill
-  const nodes = graph.nodes.slice(-40);
+  const nodes = graph.nodes.slice(-60);
   const minCells = 1 + activeBees.length + nodes.length;
   // Fill extra empties to make a nice honeycomb
-  const totalCells = Math.max(minCells, 19); // at least 2 rings
+  const totalCells = Math.max(minCells, 37); // at least 3 rings
   const positions = hexRingPositions(totalCells);
 
   const cells: CellData[] = positions.map((_, idx) => {
@@ -137,7 +138,7 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
   // Calculate SVG viewBox
   const xs = positions.map((p) => p.x);
   const ys = positions.map((p) => p.y);
-  const pad = HEX_SIZE + 8;
+  const pad = HEX_SIZE + 20;
   const minX = Math.min(...xs) - pad;
   const minY = Math.min(...ys) - pad;
   const maxX = Math.max(...xs) + pad;
@@ -146,24 +147,29 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
   const vh = maxY - minY;
 
   return (
-    <div className="h-full flex gap-0">
+    <div className="h-full flex gap-0 font-sans">
       {/* Left: Dense Honeycomb SVG */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-honey-50 to-white relative rounded-l-[20px] overflow-hidden">
         {/* Stats HUD */}
-        <div className="flex items-center gap-2 px-2 py-1 text-[10px] text-bee-dark/70 flex-shrink-0 flex-wrap">
-          <span className="game-hud px-2 py-0.5">🐝 {activeBees.length}</span>
-          {retiredCount > 0 && <span className="game-hud px-2 py-0.5">👻 {retiredCount}</span>}
-          <span className="game-hud px-2 py-0.5">⬡ {graph.nodes.length}</span>
-          <span className="game-hud px-2 py-0.5">🔗 {graph.edges.length}</span>
+        <div className="absolute top-4 left-4 right-4 z-10 flex items-center gap-3 text-xs font-bold text-honey-800/80 flex-wrap">
+          <div className="bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-honey-100 shadow-sm flex items-center gap-3">
+            <span className="flex items-center gap-1"><span className="text-sm">🐝</span> {activeBees.length}</span>
+            {retiredCount > 0 && <span className="flex items-center gap-1"><span className="text-sm">👻</span> {retiredCount}</span>}
+            <div className="w-px h-3 bg-honey-200" />
+            <span className="flex items-center gap-1"><span className="text-sm">⬡</span> {graph.nodes.length}</span>
+            <div className="w-px h-3 bg-honey-200" />
+            <span className="flex items-center gap-1"><span className="text-sm">🔗</span> {graph.edges.length}</span>
+          </div>
+          
           {/* Node type legend */}
-          <div className="ml-auto flex gap-1 flex-wrap">
+          <div className="ml-auto flex gap-1.5 flex-wrap bg-white/80 backdrop-blur-md px-2 py-1 rounded-full border border-honey-100 shadow-sm">
             {Object.entries(nodeColor).map(([type, colors]) => {
               const count = graph.nodes.filter((n) => n.type === type).length;
               if (count === 0) return null;
               return (
-                <span key={type} className="inline-flex items-center gap-0.5 px-1 py-0 text-[8px]"
+                <span key={type} className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full shadow-sm"
                   style={{ background: colors.fill, border: `1px solid ${colors.stroke}` }}>
-                  {nodeEmoji[type]}{nodeTypeNames[type]}×{count}
+                  {nodeEmoji[type]} {nodeTypeNames[type]}×{count}
                 </span>
               );
             })}
@@ -171,23 +177,44 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
         </div>
 
         {/* Honeycomb SVG */}
-        <div className="flex-1 overflow-auto pixel-border bg-honey-50/30">
+        <div className="flex-1 overflow-auto flex items-center justify-center">
           <svg
             viewBox={`${minX} ${minY} ${vw} ${vh}`}
-            className="w-full h-full"
-            style={{ minHeight: 200 }}
+            className="w-full h-full max-h-[800px]"
+            style={{ minHeight: 300 }}
             preserveAspectRatio="xMidYMid meet"
           >
+            {/* Draw edges between connected knowledge nodes */}
+            {graph.edges.map((edge) => {
+              const srcNodeData = nodes.find((n) => n.id === edge.source || n.label === edge.source);
+              const tgtNodeData = nodes.find((n) => n.id === edge.target || n.label === edge.target);
+              if (!srcNodeData || !tgtNodeData) return null;
+              const srcIdx = nodes.indexOf(srcNodeData) + 1 + activeBees.length;
+              const tgtIdx = nodes.indexOf(tgtNodeData) + 1 + activeBees.length;
+              if (srcIdx >= positions.length || tgtIdx >= positions.length) return null;
+              const p1 = positions[srcIdx];
+              const p2 = positions[tgtIdx];
+              const edgeColor = edge.type === "contradicts" ? "#fca5a5" : edge.type === "causes" ? "#fdba74" : "#fde047";
+              return (
+                <path key={`edge-${edge.id}`}
+                  d={`M ${p1.x} ${p1.y} Q ${(p1.x + p2.x)/2} ${(p1.y + p2.y)/2 - 10} ${p2.x} ${p2.y}`}
+                  fill="none"
+                  stroke={edgeColor} strokeWidth="2" opacity="0.6" strokeLinecap="round"
+                  strokeDasharray={edge.type === "contradicts" ? "4,4" : "none"}
+                />
+              );
+            })}
+
             {/* Render cells */}
             {cells.map((cell, idx) => {
               const { x, y } = positions[idx];
-              const pts = hexPoints(x, y, HEX_SIZE - 1);
+              const pts = hexPoints(x, y, HEX_SIZE - 2);
 
               if (cell.kind === "hive") {
                 return (
                   <g key="hive">
-                    <polygon points={pts} fill="#FFD54F" stroke="#b07500" strokeWidth="2" />
-                    <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="central" fontSize="14">🏠</text>
+                    <polygon points={pts} fill="#ffcc45" stroke="#fdb022" strokeWidth="3" strokeLinejoin="round" />
+                    <text x={x} y={y + 2} textAnchor="middle" dominantBaseline="central" fontSize="20">🍯</text>
                   </g>
                 );
               }
@@ -196,18 +223,22 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
                 const bee = cell.bee;
                 const isWorking = bee.status === "searching" || bee.status === "analyzing";
                 const isError = bee.status === "error";
-                const fill = isWorking ? "#ffecaa" : isError ? "#ffe8ec" : bee.status === "resting" ? "#e4f5ff" : "#fff8d6";
-                const stroke = isWorking ? "#e09800" : isError ? "#FB7185" : bee.status === "resting" ? "#64D2FF" : "#ffc83a";
+                const fill = isWorking ? "#fff9d6" : isError ? "#fef2f2" : bee.status === "resting" ? "#eff6ff" : "#fff";
+                const stroke = isWorking ? "#ffcc45" : isError ? "#fca5a5" : bee.status === "resting" ? "#7dd3fc" : "#fef08a";
                 return (
-                  <g key={`bee-${bee.id}`} className="hex-cell" style={{ cursor: "default" }}>
-                    <polygon points={pts} fill={fill} stroke={stroke} strokeWidth="2" />
-                    <text x={x} y={y - 4} textAnchor="middle" dominantBaseline="central" fontSize="12">🐝</text>
-                    <text x={x} y={y + 10} textAnchor="middle" fontSize="6" fill="#2d1f00" opacity="0.7">
-                      {bee.name.slice(0, 6)}
+                  <g key={`bee-${bee.id}`} className="hex-cell" style={{ cursor: "default" }}
+                    onMouseMove={(e) => setHoverData({ type: "bee", data: bee, x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setHoverData(null)}
+                  >
+                    <polygon points={pts} fill={fill} stroke={stroke} strokeWidth="2.5" strokeLinejoin="round" />
+                    <text x={x} y={y - 5} textAnchor="middle" dominantBaseline="central" fontSize="16">🐝</text>
+                    <text x={x} y={y + 12} textAnchor="middle" fontSize="8" fill="#73400b" fontWeight="bold">
+                      {bee.name.slice(0, 5)}
                     </text>
                     {isWorking && (
-                      <polygon points={pts} fill="none" stroke={stroke} strokeWidth="1" opacity="0.4">
-                        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.2s" repeatCount="indefinite" />
+                      <polygon points={pts} fill="none" stroke={stroke} strokeWidth="2" opacity="0.5" strokeLinejoin="round" style={{ transformOrigin: `${x}px ${y}px` }}>
+                        <animate attributeName="opacity" values="0.5;0;0.5" dur="1.5s" repeatCount="indefinite" />
+                        <animate attributeName="transform" values="scale(1);scale(1.1);scale(1)" dur="1.5s" repeatCount="indefinite" fill="freeze" />
                       </polygon>
                     )}
                   </g>
@@ -220,21 +251,22 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
                 const isSelected = selectedNode?.id === node.id;
                 return (
                   <g key={`node-${node.id}`}
-                    className="hex-cell"
+                    className="hex-cell transition-all"
                     style={{ cursor: "pointer" }}
                     onClick={() => setSelectedNode(isSelected ? null : node)}
+                    onMouseMove={(e) => setHoverData({ type: "node", data: node, x: e.clientX, y: e.clientY })}
+                    onMouseLeave={() => setHoverData(null)}
                   >
                     {isSelected && (
-                      <polygon points={hexPoints(x, y, HEX_SIZE + 3)} fill="none" stroke={colors.stroke} strokeWidth="2" opacity="0.5">
-                        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1s" repeatCount="indefinite" />
+                      <polygon points={hexPoints(x, y, HEX_SIZE + 4)} fill="none" stroke={colors.stroke} strokeWidth="3" opacity="0.4" strokeLinejoin="round">
+                        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite" />
                       </polygon>
                     )}
-                    <polygon points={pts} fill={colors.fill} stroke={colors.stroke} strokeWidth={isSelected ? 2.5 : 1.5} />
-                    <text x={x} y={y - 4} textAnchor="middle" dominantBaseline="central" fontSize="10">
+                    <polygon points={pts} fill={colors.fill} stroke={colors.stroke} strokeWidth={isSelected ? 3 : 2} strokeLinejoin="round" />
+                    <text x={x} y={y - 5} textAnchor="middle" dominantBaseline="central" fontSize="14">
                       {nodeEmoji[node.type] || "💡"}
                     </text>
-                    <text x={x} y={y + 10} textAnchor="middle" fontSize="6" fill="#2d1f00" opacity="0.8"
-                      fontWeight={isSelected ? "bold" : "normal"}>
+                    <text x={x} y={y + 12} textAnchor="middle" fontSize="7.5" fill="#73400b" fontWeight={isSelected ? "900" : "bold"} opacity="0.9">
                       {node.label.length > 5 ? node.label.slice(0, 5) + "…" : node.label}
                     </text>
                   </g>
@@ -244,114 +276,150 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
               // Empty cell
               return (
                 <g key={`empty-${idx}`}>
-                  <polygon points={pts} fill="#fffef5" stroke="#ffd34e" strokeWidth="0.5" opacity="0.3" />
+                  <polygon points={pts} fill="#ffffff" stroke="#fef08a" strokeWidth="1" opacity="0.6" strokeLinejoin="round" />
                 </g>
-              );
-            })}
-
-            {/* Draw edges between connected knowledge nodes */}
-            {graph.edges.map((edge) => {
-              const srcNodeData = nodes.find((n) => n.id === edge.source || n.label === edge.source);
-              const tgtNodeData = nodes.find((n) => n.id === edge.target || n.label === edge.target);
-              if (!srcNodeData || !tgtNodeData) return null;
-              const srcIdx = nodes.indexOf(srcNodeData) + 1 + activeBees.length;
-              const tgtIdx = nodes.indexOf(tgtNodeData) + 1 + activeBees.length;
-              if (srcIdx >= positions.length || tgtIdx >= positions.length) return null;
-              const p1 = positions[srcIdx];
-              const p2 = positions[tgtIdx];
-              const edgeColor = edge.type === "contradicts" ? "#FB7185" : edge.type === "causes" ? "#FF8F00" : "#ffc83a";
-              return (
-                <line key={edge.id}
-                  x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                  stroke={edgeColor} strokeWidth="1" opacity="0.4"
-                  strokeDasharray={edge.type === "contradicts" ? "3,3" : "none"}
-                />
               );
             })}
           </svg>
         </div>
 
+        {/* Hover Tooltip Bubble */}
+        {hoverData && (
+          <div
+            className="fixed pointer-events-none z-50 bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-honey-200 text-sm max-w-xs transition-opacity animate-pop-in"
+            style={{ left: hoverData.x + 15, top: hoverData.y + 15 }}
+          >
+            {hoverData.type === "node" && (() => {
+              const node = hoverData.data as KnowledgeNode;
+              return (
+                <>
+                  <div className="font-extrabold text-honey-900 mb-1.5 flex items-center gap-1.5">
+                    <span>{nodeEmoji[node.type] || "💡"}</span>
+                    <span className="line-clamp-1">{node.label}</span>
+                  </div>
+                  <div className="text-xs text-bee-dark/80 line-clamp-5 leading-relaxed">
+                    {node.content}
+                  </div>
+                  <div className="text-[10px] text-honey-600/60 mt-2 font-bold flex gap-2">
+                    <span>权值: {node.weight.toFixed(1)}</span>
+                    <span>轮次: {node.round}</span>
+                  </div>
+                </>
+              );
+            })()}
+            {hoverData.type === "bee" && (() => {
+              const bee = hoverData.data as BeeAgent;
+              return (
+                <>
+                  <div className="font-extrabold text-honey-900 mb-1.5 flex items-center gap-1.5">
+                    <span>🐝</span>
+                    <span>{bee.name}</span>
+                    <span className="text-[10px] bg-honey-100 text-honey-700 px-1.5 py-0.5 rounded-full ml-auto">{statusLabel[bee.status]}</span>
+                  </div>
+                  <div className="text-xs text-bee-dark/80 line-clamp-3 leading-relaxed">
+                    任务: {bee.task.query}
+                  </div>
+                  {bee.findings.length > 0 && (
+                    <div className="text-[10px] text-honey-600/60 mt-2 font-bold">
+                      已发现 {bee.findings.length} 条情报
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
+
         {/* Selected node detail */}
         <AnimatePresence>
           {selectedNode && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="flex-shrink-0 p-2 pixel-card text-[11px] overflow-hidden"
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute bottom-0 left-0 right-0 p-4 z-20"
             >
-              <div className="flex items-center gap-2 mb-1">
-                <span>{nodeEmoji[selectedNode.type]}</span>
-                <span className="font-bold text-bee-dark">{selectedNode.label}</span>
-                <span className="pixel-tag text-[8px]"
-                  style={{
-                    background: nodeColor[selectedNode.type]?.fill,
-                    borderColor: nodeColor[selectedNode.type]?.stroke,
-                  }}>
-                  {nodeTypeNames[selectedNode.type]}
-                </span>
-                <span className="ml-auto text-bee-dark/40 text-[9px]">
-                  R{selectedNode.round} | W{selectedNode.weight.toFixed(1)}
-                </span>
-                <button onClick={() => setSelectedNode(null)} className="text-bee-dark/30 hover:text-bee-dark font-bold">✕</button>
-              </div>
-              <p className="text-bee-dark/70 leading-relaxed">{selectedNode.content}</p>
-              {graph.edges.filter(
-                (e) => e.source === selectedNode.id || e.target === selectedNode.id ||
-                       e.source === selectedNode.label || e.target === selectedNode.label
-              ).length > 0 && (
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {graph.edges
-                    .filter((e) => e.source === selectedNode.id || e.target === selectedNode.id ||
-                                   e.source === selectedNode.label || e.target === selectedNode.label)
-                    .slice(0, 6)
-                    .map((edge) => {
-                      const other = (edge.source === selectedNode.id || edge.source === selectedNode.label)
-                        ? graph.nodes.find((n) => n.id === edge.target || n.label === edge.target)?.label || edge.target
-                        : graph.nodes.find((n) => n.id === edge.source || n.label === edge.source)?.label || edge.source;
-                      return (
-                        <span key={edge.id} className="pixel-tag text-[8px] border-honey-400 bg-honey-50 text-bee-dark/60">
-                          {edge.type} → {other}
-                        </span>
-                      );
-                    })}
+              <div className="bg-white/90 backdrop-blur-xl p-5 rounded-2xl shadow-[0_-8px_30px_rgba(253,176,34,0.15)] border border-honey-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl drop-shadow-sm">{nodeEmoji[selectedNode.type]}</span>
+                  <span className="font-extrabold text-honey-900 text-lg">{selectedNode.label}</span>
+                  <span className="cute-tag shadow-sm ml-2"
+                    style={{
+                      background: nodeColor[selectedNode.type]?.fill,
+                      borderColor: nodeColor[selectedNode.type]?.stroke,
+                      color: nodeColor[selectedNode.type]?.stroke,
+                    }}>
+                    {nodeTypeNames[selectedNode.type]}
+                  </span>
+                  <span className="ml-auto bg-honey-50 text-honey-600 px-2 py-1 rounded-lg text-xs font-bold border border-honey-100">
+                    R{selectedNode.round} | W{selectedNode.weight.toFixed(1)}
+                  </span>
+                  <button onClick={() => setSelectedNode(null)} className="w-8 h-8 rounded-full bg-honey-100 text-honey-600 hover:bg-honey-200 flex items-center justify-center transition-colors">✕</button>
                 </div>
-              )}
+                <p className="text-bee-dark/80 leading-relaxed text-sm font-medium">{selectedNode.content}</p>
+                {graph.edges.filter(
+                  (e) => e.source === selectedNode.id || e.target === selectedNode.id ||
+                         e.source === selectedNode.label || e.target === selectedNode.label
+                ).length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-honey-100">
+                    {graph.edges
+                      .filter((e) => e.source === selectedNode.id || e.target === selectedNode.id ||
+                                     e.source === selectedNode.label || e.target === selectedNode.label)
+                      .slice(0, 6)
+                      .map((edge) => {
+                        const other = (edge.source === selectedNode.id || edge.source === selectedNode.label)
+                          ? graph.nodes.find((n) => n.id === edge.target || n.label === edge.target)?.label || edge.target
+                          : graph.nodes.find((n) => n.id === edge.source || n.label === edge.source)?.label || edge.source;
+                        return (
+                          <span key={edge.id} className="cute-tag bg-white border-honey-200 text-honey-700 shadow-sm flex items-center gap-1">
+                            <span className="text-[10px] opacity-60">{edge.type}</span> <span>→ {other}</span>
+                          </span>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {/* Right: Bee list */}
-      <div className="w-[200px] flex-shrink-0 border-l-2 border-bee-dark/20 flex flex-col bg-white/40">
-        <div className="px-2 py-1.5 text-[10px] font-bold text-bee-dark/50 border-b border-honey-200 flex-shrink-0">
-          🐝 蜜蜂列表 ({bees.length})
+      <div className="w-[240px] flex-shrink-0 border-l border-honey-100 flex flex-col bg-white rounded-r-[20px] shadow-[-4px_0_24px_rgba(253,176,34,0.03)] z-10">
+        <div className="px-4 py-3 text-sm font-extrabold text-honey-800 border-b border-honey-100 flex-shrink-0 bg-honey-50/50 flex items-center gap-2">
+          <span className="text-xl">🐝</span> 蜜蜂列表 ({bees.length})
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-honey-50/20">
           {bees.map((bee) => (
             <div
               key={bee.id}
-              className="flex items-center gap-1.5 px-2 py-1.5 border-b border-honey-100 text-[10px] hover:bg-honey-50 transition-colors"
+              className="flex items-center gap-3 p-2.5 rounded-xl border border-honey-100 bg-white hover:bg-honey-50 hover:border-honey-200 transition-colors shadow-sm group"
             >
-              <span className={`w-1.5 h-1.5 flex-shrink-0 ${statusDotColor[bee.status]}`} />
-              <BeeIcon status={bee.status} size={14} animate={false} />
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-bee-dark truncate">{bee.name}</div>
-                <div className="text-bee-dark/40 truncate text-[9px]">{bee.task.query.slice(0, 20)}</div>
+              <div className="relative">
+                <BeeIcon status={bee.status} size={20} animate={false} />
+                <span className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-white ${statusDotColor[bee.status]}`} />
               </div>
-              <span className="text-[8px] text-bee-dark/40 flex-shrink-0">
-                [{statusLabel[bee.status]}]
-              </span>
-              {bee.findings.length > 0 && (
-                <span className="text-honey-600 font-bold text-[8px] flex-shrink-0">
-                  🍯{bee.findings.length}
+              <div className="flex-1 min-w-0">
+                <div className="font-extrabold text-bee-dark text-xs truncate group-hover:text-honey-600 transition-colors">{bee.name}</div>
+                <div className="text-bee-dark/40 truncate text-[10px] font-medium">{bee.task.query.slice(0, 20)}</div>
+              </div>
+              <div className="flex flex-col items-end justify-center">
+                <span className="text-[10px] text-honey-600/70 font-bold bg-honey-50 px-1.5 py-0.5 rounded-md">
+                  {statusLabel[bee.status]}
                 </span>
-              )}
+                {bee.findings.length > 0 && (
+                  <span className="text-honey-500 font-bold text-[10px] mt-1 flex items-center gap-0.5">
+                    🍯 {bee.findings.length}
+                  </span>
+                )}
+              </div>
             </div>
           ))}
           {bees.length === 0 && (
-            <div className="flex items-center justify-center h-full text-bee-dark/20 text-[10px] p-4">
-              等待派遣...
+            <div className="flex flex-col items-center justify-center h-full text-honey-800/30 text-xs p-6 gap-2">
+              <span className="text-4xl grayscale opacity-50">💤</span>
+              <span className="font-bold">等待派遣...</span>
             </div>
           )}
         </div>

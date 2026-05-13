@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 Argus — Search Proxy API Route
+   🐝 BeeSearch — Search Proxy API Route
    
    解决浏览器 CORS 限制。
    前端调用 /api/search，由服务端代理请求各信息源 API。
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const fetchOptions: RequestInit = {
       method,
       headers: {
-        "User-Agent": "Argus-Research-Bot/1.0",
+        "User-Agent": "BeeSearch-Research-Bot/1.0",
         ...headers,
       },
     };

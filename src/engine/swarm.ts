@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 Argus — Swarm Research Engine
+   🐝 BeeSearch — Swarm Research Engine
    
    蜂群智能研究引擎。
    

@@ -37,7 +37,7 @@ export const redditAdapter: FlowerAdapter = {
 
     const response = await proxyFetch(url, {
       headers: {
-        "User-Agent": "Argus-Research-Bot/1.0",
+        "User-Agent": "BeeSearch-Research-Bot/1.0",
         ...config.customHeaders,
       },
     });
@@ -85,7 +85,7 @@ export const redditAdapter: FlowerAdapter = {
 
     const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`;
     const response = await proxyFetch(url, {
-      headers: { "User-Agent": "Argus-Research-Bot/1.0" },
+      headers: { "User-Agent": "BeeSearch-Research-Bot/1.0" },
     });
 
     if (!response.ok) {

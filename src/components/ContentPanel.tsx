@@ -46,42 +46,45 @@ function HtmlReportViewer({ html }: { html: string }) {
   }, [html]);
 
   return (
-    <div className="h-full flex flex-col gap-2">
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="text-xs text-bee-dark/50">📄 研究报告</span>
-        <button
-          onClick={() => {
-            const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "argus-research-report.html";
-            a.click();
-            URL.revokeObjectURL(url);
-          }}
-          className="ml-auto pixel-btn px-3 py-1 bg-honey-200 text-xs text-bee-dark/60"
-        >
-          ⬇️ 下载
-        </button>
-        <button
-          onClick={() => {
-            const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            window.open(url, "_blank");
-          }}
-          className="pixel-btn px-3 py-1 bg-honey-200 text-xs text-bee-dark/60"
-        >
-          🔗 新窗口
-        </button>
+    <div className="h-full flex flex-col gap-3">
+      <div className="flex items-center gap-3 flex-shrink-0 bg-white px-4 py-2.5 rounded-2xl border border-honey-100 shadow-sm">
+        <span className="text-sm font-bold text-honey-700 flex items-center gap-2"><span>📄</span> 研究报告</span>
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={() => {
+              const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "beesearch-research-report.html";
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="cute-btn px-4 py-1.5 bg-honey-50 hover:bg-honey-100 text-honey-800 text-xs border border-honey-200"
+          >
+            ⬇️ 下载
+          </button>
+          <button
+            onClick={() => {
+              const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+              const url = URL.createObjectURL(blob);
+              window.open(url, "_blank");
+            }}
+            className="cute-btn px-4 py-1.5 bg-honey-50 hover:bg-honey-100 text-honey-800 text-xs border border-honey-200"
+          >
+            🔗 新窗口
+          </button>
+        </div>
       </div>
-      <iframe
-        ref={iframeRef}
-        srcDoc={html}
-        sandbox="allow-same-origin allow-popups"
-        className="flex-1 w-full pixel-border bg-white"
-        style={{ minHeight: `${iframeHeight}px` }}
-        title="研究报告"
-      />
+      <div className="flex-1 report-frame overflow-hidden">
+        <iframe
+          ref={iframeRef}
+          srcDoc={html}
+          sandbox="allow-same-origin allow-popups"
+          className="w-full h-full bg-white rounded-[22px]"
+          title="研究报告"
+        />
+      </div>
     </div>
   );
 }
@@ -98,41 +101,43 @@ export default function ContentPanel({ bees, graph, report, status }: ContentPan
   ];
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col font-sans">
       {/* Tab bar */}
-      <div className="flex items-center gap-1 px-3 pt-3 pb-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => tab.enabled && setActiveTab(tab.id)}
-            className={`px-4 py-1.5 text-[11px] font-bold transition-all ${
-              activeTab === tab.id
-                ? "pixel-btn bg-honey-400 text-bee-dark"
-                : tab.enabled
-                ? "pixel-border-sm text-bee-dark/60 bg-white hover:bg-honey-100"
-                : "text-bee-dark/20 cursor-not-allowed border-2 border-transparent"
-            }`}
-          >
-            {tab.emoji} {tab.label}
-            {tab.id === "hive" && (bees.length > 0 || graph.nodes.length > 0) && (
-              <span className="ml-1 text-[9px] opacity-60">
-                ({bees.filter((b) => b.status !== "retired").length}🐝 {graph.nodes.length}⬡)
-              </span>
-            )}
-            {tab.id === "report" && report && activeTab !== "report" && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="inline-block ml-1 w-2 h-2 bg-red-400 border border-bee-dark"
-              />
-            )}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 px-4 pt-4 pb-2 border-b-2 border-honey-100/50 bg-white/30 backdrop-blur-sm z-10">
+        <div className="flex bg-honey-100/50 p-1 rounded-full border-2 border-white shadow-sm">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => tab.enabled && setActiveTab(tab.id)}
+              className={`px-5 py-1.5 text-xs font-bold transition-all rounded-full flex items-center gap-1.5 ${
+                activeTab === tab.id
+                  ? "bg-white text-honey-700 shadow-sm border border-honey-200"
+                  : tab.enabled
+                  ? "text-honey-600/70 hover:text-honey-800 border border-transparent"
+                  : "text-honey-800/30 cursor-not-allowed border border-transparent"
+              }`}
+            >
+              <span className="text-base">{tab.emoji}</span> <span>{tab.label}</span>
+              {tab.id === "hive" && (bees.length > 0 || graph.nodes.length > 0) && (
+                <span className="ml-1 text-[10px] bg-honey-100 px-1.5 rounded-full text-honey-700">
+                  {bees.filter((b) => b.status !== "retired").length}🐝 {graph.nodes.length}⬡
+                </span>
+              )}
+              {tab.id === "report" && report && activeTab !== "report" && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="inline-block ml-1 w-2 h-2 rounded-full bg-red-400"
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
         {/* Status badge */}
-        <div className="ml-auto game-hud px-2 py-1 text-[9px] flex items-center gap-1.5">
+        <div className="ml-auto bg-white px-3 py-1.5 rounded-full border border-honey-100 shadow-sm text-[11px] font-bold flex items-center gap-2 text-honey-700">
           {(status === "searching" || status === "planning" || status === "expanding") && (
-            <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }}>
+            <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
               🟡
             </motion.span>
           )}
@@ -154,22 +159,23 @@ export default function ContentPanel({ bees, graph, report, status }: ContentPan
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-3 overflow-hidden">
+      <div className="flex-1 p-4 overflow-hidden relative">
         <AnimatePresence mode="wait">
           {activeTab === "hive" && (
             <motion.div
               key="hive"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="h-full"
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+              className="h-full cute-card overflow-hidden"
             >
               {bees.length === 0 && graph.nodes.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-bee-dark/30 gap-3">
-                  <span className="text-5xl">🐝</span>
-                  <div className="pixel-card p-4 text-center">
-                    <p className="text-sm font-bold mb-1">蜜蜂们正在蜂巢里等待</p>
-                    <p className="text-xs text-bee-dark/40">
+                <div className="h-full flex flex-col items-center justify-center text-honey-800/40 gap-4">
+                  <span className="text-6xl animate-bee-float opacity-50 grayscale">🐝</span>
+                  <div className="text-center bg-honey-50/50 p-6 rounded-3xl border border-honey-100">
+                    <p className="text-base font-extrabold mb-2 text-honey-800/60">蜜蜂们正在蜂巢里等待</p>
+                    <p className="text-xs text-honey-800/40">
                       输入研究目标即可派出蜂群
                     </p>
                   </div>
@@ -183,18 +189,19 @@ export default function ContentPanel({ bees, graph, report, status }: ContentPan
           {activeTab === "report" && (
             <motion.div
               key="report"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="h-full overflow-auto"
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+              className="h-full overflow-hidden"
             >
               {report ? (
                 <HtmlReportViewer html={report} />
               ) : (
-                <div className="h-full flex items-center justify-center text-bee-dark/30 text-sm">
+                <div className="h-full cute-card flex flex-col items-center justify-center text-honey-800/40">
                   <div className="text-center">
-                    <span className="text-4xl mb-3 block">📝</span>
-                    <p>报告生成中...</p>
+                    <span className="text-5xl mb-4 block animate-bounce opacity-50 grayscale">📝</span>
+                    <p className="font-extrabold text-honey-800/60">报告生成中...</p>
                   </div>
                 </div>
               )}

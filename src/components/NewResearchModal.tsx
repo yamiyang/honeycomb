@@ -38,40 +38,40 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
           onClick={onClose}
         >
-          <div className="absolute inset-0 bg-bee-dark/60" />
+          <div className="absolute inset-0 bg-bee-dark/40" />
 
           <motion.div
-            initial={{ scale: 0.8, y: 30 }}
+            initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.8, y: 30 }}
+            exit={{ scale: 0.9, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg pixel-card p-0 overflow-hidden"
+            className="relative w-full max-w-lg cute-card p-0 overflow-hidden"
           >
             {/* Header */}
-            <div className="game-hud px-5 py-3 flex items-center gap-3">
-              <span className="text-2xl">📋</span>
+            <div className="cute-header px-6 py-4 flex items-center gap-4">
+              <span className="text-3xl animate-bee-float">📋</span>
               <div>
-                <h2 className="font-bold text-base text-honey-300">
+                <h2 className="font-extrabold text-lg text-honey-600">
                   新建研究任务
                 </h2>
-                <p className="text-[10px] text-honey-500/70">
+                <p className="text-xs text-honey-700/60 font-medium">
                   派出蜂群为你采集情报
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="ml-auto w-7 h-7 pixel-border-sm bg-red-500 text-white flex items-center justify-center text-xs font-bold hover:bg-red-600"
+                className="ml-auto w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center font-bold hover:bg-red-500 hover:text-white transition-all shadow-sm"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-5 bg-gradient-to-b from-honey-50 to-white">
+            <div className="p-6 bg-gradient-to-b from-honey-50 to-white">
               {/* Presets */}
-              <div className="mb-4">
+              <div className="mb-5">
                 <label className="text-xs text-bee-dark/60 mb-2 block font-bold">
                   ⚡ 快速任务
                 </label>
@@ -80,30 +80,30 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
                     <button
                       key={p.title}
                       onClick={() => handlePreset(p)}
-                      className="pixel-btn px-3 py-1.5 bg-honey-100 text-[11px] text-bee-dark/70 hover:bg-honey-200 flex items-center gap-1"
+                      className="cute-btn px-3 py-1.5 bg-white text-xs text-bee-dark border-2 border-honey-100 hover:border-honey-300 hover:bg-honey-50 flex items-center gap-1.5 shadow-sm"
                     >
-                      {p.emoji} {p.title}
+                      <span>{p.emoji}</span> {p.title}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Title */}
-              <div className="mb-3">
-                <label className="text-xs text-bee-dark/60 mb-1 block font-bold">
+              <div className="mb-4">
+                <label className="text-xs text-bee-dark/60 mb-1.5 block font-bold">
                   📜 研究标题
                 </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="如：AI Agent 行业调研"
-                  className="w-full px-3 py-2.5 pixel-border-sm bg-white text-sm focus:outline-none focus:border-honey-500"
+                  className="w-full px-4 py-3 rounded-2xl border-2 border-honey-100 bg-white text-sm focus:outline-none focus:border-honey-400 focus:bg-honey-50/30 transition-colors shadow-sm"
                 />
               </div>
 
               {/* Objective */}
-              <div className="mb-5">
-                <label className="text-xs text-bee-dark/60 mb-1 block font-bold">
+              <div className="mb-6">
+                <label className="text-xs text-bee-dark/60 mb-1.5 block font-bold">
                   🎯 研究目标
                 </label>
                 <textarea
@@ -111,7 +111,7 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
                   onChange={(e) => setObjective(e.target.value)}
                   placeholder="详细描述你想研究的方向和关注点..."
                   rows={3}
-                  className="w-full px-3 py-2.5 pixel-border-sm bg-white text-sm focus:outline-none focus:border-honey-500 resize-none"
+                  className="w-full px-4 py-3 rounded-2xl border-2 border-honey-100 bg-white text-sm focus:outline-none focus:border-honey-400 focus:bg-honey-50/30 resize-none transition-colors shadow-sm"
                 />
               </div>
 
@@ -119,15 +119,15 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={onClose}
-                  className="pixel-btn px-5 py-2 bg-gray-200 text-sm text-bee-dark/60 hover:bg-gray-300"
+                  className="cute-btn px-6 py-2.5 bg-gray-100 text-sm text-bee-dark/60 hover:bg-gray-200 font-bold"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleCreate}
                   disabled={!title.trim() || !objective.trim()}
-                  className="pixel-btn px-5 py-2 bg-honey-400 text-bee-dark text-sm font-bold
-                    disabled:opacity-30 disabled:cursor-not-allowed hover:bg-honey-500"
+                  className="cute-btn px-6 py-2.5 bg-gradient-to-r from-honey-400 to-honey-500 text-white text-sm font-bold shadow-md
+                    disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   🐝 开始研究！
                 </button>

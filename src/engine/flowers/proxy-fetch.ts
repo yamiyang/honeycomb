@@ -22,7 +22,7 @@ export async function proxyFetch(
     const fetchOptions: RequestInit = {
       method: options?.method || "GET",
       headers: {
-        "User-Agent": "Argus-Research-Bot/1.0",
+        "User-Agent": "BeeSearch-Research-Bot/1.0",
         ...options?.headers,
       },
     };

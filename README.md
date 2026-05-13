@@ -1,4 +1,4 @@
-# 🐝 Argus — 蜂群智能研究平台
+# 🐝 BeeSearch — 蜂群智能研究平台
 
 > **Swarm Intelligence Research Platform**
 > 启发式扩散情报搜索与行业调研工具
@@ -30,7 +30,7 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│                 Argus UI                     │
+│                 BeeSearch UI                     │
 │  ┌──────────────┐  ┌──────────────────────┐  │
 │  │   Chat Panel │  │   Content Panel      │  │
 │  │   (Left)     │  │   ┌─ 🐝 Swarm Viz   │  │
@@ -99,7 +99,7 @@ src/
 
 ## 🧠 启发式搜索机制
 
-Argus 的核心设计是 **AI 自主启发式搜索**：
+BeeSearch 的核心设计是 **AI 自主启发式搜索**：
 
 1. **AI 规划** — 蜂后分析研究目标，自主规划初始搜索方向
 2. **蜂群执行** — 蜜蜂并行搜索多个信息源
@@ -122,5 +122,5 @@ Argus 的核心设计是 **AI 自主启发式搜索**：
 ---
 
 <div align="center">
-  <b>🐝 Powered by Argus — Making Research as Natural as Bees Collecting Honey</b>
+  <b>🐝 Powered by BeeSearch — Making Research as Natural as Bees Collecting Honey</b>
 </div>

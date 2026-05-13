@@ -119,7 +119,7 @@ async function searchViaProxy(
   const url = `https://api.crossref.org/works?${params.toString()}`;
   const response = await proxyFetch(url, {
     headers: {
-      "User-Agent": "Argus-Research-Bot/1.0 (mailto:research@argus.ai)",
+      "User-Agent": "BeeSearch-Research-Bot/1.0 (mailto:research@beesearch.ai)",
     },
   });
 

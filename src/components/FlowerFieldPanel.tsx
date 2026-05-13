@@ -15,22 +15,24 @@ export default function FlowerFieldPanel() {
   const activeCount = sources.filter(s => s.status === "active").length;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col font-sans">
       {/* Header */}
-      <div className="game-hud px-4 py-3">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-2xl">🌸</span>
-          <h2 className="text-base font-bold text-honey-300">
-            花田 · 信息源管理
-          </h2>
+      <div className="cute-header px-6 py-4 flex items-center justify-between shadow-sm z-10 relative">
+        <div className="flex items-center gap-3 mb-1">
+          <span className="text-3xl drop-shadow-sm animate-bee-float">🌸</span>
+          <div>
+            <h2 className="text-lg font-extrabold text-honey-700">
+              花田 · 信息源管理
+            </h2>
+            <p className="text-xs text-honey-600/70 font-medium">
+              激活 <span className="text-honey-500 font-bold bg-honey-100 px-1.5 rounded-md">{activeCount}</span>/{sources.length} 个信息源 | 蜜蜂将采集已激活的花田
+            </p>
+          </div>
         </div>
-        <p className="text-[10px] text-honey-500/70">
-          激活 <span className="text-honey-300 font-bold">{activeCount}</span>/{sources.length} 个信息源 | 蜜蜂将采集已激活的花田
-        </p>
       </div>
 
       {/* Source List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gradient-to-b from-honey-50 to-white">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-honey-50/50">
         {sources.map((source) => (
           <FlowerCard
             key={source.id}
@@ -60,9 +62,9 @@ export default function FlowerFieldPanel() {
       </div>
 
       {/* Footer */}
-      <div className="p-2 border-t-3 border-bee-dark bg-honey-100">
-        <p className="text-[9px] text-bee-dark/50 text-center">
-          💡 arXiv、Hacker News、Reddit 无需 API Key
+      <div className="p-3 border-t border-honey-100 bg-white">
+        <p className="text-[11px] text-honey-800/40 text-center font-bold">
+          💡 arXiv、Hacker News、Reddit 无需 API Key 即可采蜜
         </p>
       </div>
     </div>
@@ -88,65 +90,65 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
   return (
     <motion.div
       layout
-      className={`pixel-border-sm p-3 transition-colors ${
+      className={`cute-card p-4 transition-all relative ${
         isActive
-          ? "bg-gradient-to-r from-green-50 to-honey-50 border-green-500"
-          : "bg-white/80 border-gray-400"
+          ? "border-green-300 shadow-[0_4px_16px_rgba(74,222,128,0.1)]"
+          : "border-gray-200 opacity-80"
       }`}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">{source.icon}</span>
+      <div className="flex items-center gap-4">
+        <span className="text-3xl drop-shadow-sm">{source.icon}</span>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-sm text-bee-dark">{source.name}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-extrabold text-[15px] text-bee-dark">{source.name}</span>
             {isActive && (
-              <span className="pixel-tag text-[8px] border-green-500 text-green-700 bg-green-100">
+              <span className="cute-tag bg-green-50 border-green-200 text-green-600">
                 ✓ 激活
               </span>
             )}
             {source.status === "error" && (
-              <span className="pixel-tag text-[8px] border-red-500 text-red-700 bg-red-100">
+              <span className="cute-tag bg-red-50 border-red-200 text-red-600">
                 💥 错误
               </span>
             )}
             {source.status === "rate_limited" && (
-              <span className="pixel-tag text-[8px] border-orange-500 text-orange-700 bg-orange-100">
+              <span className="cute-tag bg-orange-50 border-orange-200 text-orange-600">
                 ⏳ 限流
               </span>
             )}
           </div>
-          <p className="text-[11px] text-bee-dark/50 truncate">{source.description}</p>
+          <p className="text-xs text-bee-dark/50 truncate font-medium">{source.description}</p>
         </div>
 
+        {/* Custom iOS-like Switch */}
         <button
           onClick={onToggle}
-          className={`w-10 h-5 pixel-border-sm relative transition-colors ${
-            isActive ? "bg-green-400" : "bg-gray-300"
+          className={`w-12 h-6 rounded-full relative transition-colors shadow-inner flex-shrink-0 ${
+            isActive ? "bg-green-400" : "bg-gray-200"
           }`}
         >
           <motion.div
-            className="absolute top-0 w-4 h-4 bg-white pixel-border-sm"
-            style={{ top: "-1px" }}
-            animate={{ left: isActive ? 18 : 0 }}
+            className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm"
+            animate={{ left: isActive ? 26 : 2 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
           />
         </button>
       </div>
 
-      <div className="flex gap-1 mt-2 flex-wrap">
+      <div className="flex gap-1.5 mt-3 flex-wrap">
         {source.capabilities.map(cap => (
-          <span key={cap} className="pixel-tag text-[8px] border-honey-400 text-honey-700 bg-honey-50">
+          <span key={cap} className="cute-tag text-[10px] bg-honey-50 text-honey-600 border border-honey-100">
             {capabilityLabel(cap)}
           </span>
         ))}
       </div>
 
       {needsKey && (
-        <div className="mt-2">
+        <div className="mt-4 pt-3 border-t border-honey-100/50">
           {!isEditing ? (
             <button
               onClick={onEdit}
-              className="text-[11px] text-honey-600 hover:text-honey-800 font-bold"
+              className="text-xs text-honey-600 hover:text-honey-500 font-bold flex items-center gap-1 bg-honey-50 px-3 py-1.5 rounded-full transition-colors"
             >
               {source.config.apiKey || source.config.bearerToken ? "✓ 已配置 · 修改" : "⚙️ 配置 API Key"}
             </button>
@@ -156,11 +158,11 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="space-y-2 mt-2"
+                className="space-y-3 mt-2"
               >
                 {getConfigFields(source.type).map(field => (
                   <div key={field.key}>
-                    <label className="text-[10px] text-bee-dark/60 block mb-0.5 font-bold">
+                    <label className="text-xs text-bee-dark/60 block mb-1.5 font-bold ml-1">
                       {field.label}
                     </label>
                     <input
@@ -168,16 +170,16 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
                       placeholder={field.placeholder}
                       value={tempConfig[field.key] || (source.config as Record<string, string>)[field.key] || ""}
                       onChange={(e) => onConfigChange(field.key, e.target.value)}
-                      className="w-full px-2 py-1 text-xs pixel-border-sm bg-white focus:outline-none focus:border-honey-500"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-honey-200 bg-white focus:outline-none focus:border-honey-400 shadow-sm transition-colors"
                     />
                   </div>
                 ))}
-                <div className="flex gap-2">
-                  <button onClick={onEdit} className="pixel-btn px-3 py-1 text-[11px] bg-honey-400 text-bee-dark font-bold">
-                    保存
-                  </button>
-                  <button onClick={onCancel} className="pixel-btn px-3 py-1 text-[11px] bg-gray-200 text-bee-dark/50">
+                <div className="flex gap-2 justify-end mt-3">
+                  <button onClick={onCancel} className="cute-btn px-4 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-bee-dark/60 font-bold">
                     取消
+                  </button>
+                  <button onClick={onEdit} className="cute-btn px-4 py-1.5 text-xs bg-honey-400 hover:bg-honey-500 text-white font-bold shadow-sm">
+                    保存
                   </button>
                 </div>
               </motion.div>
@@ -187,8 +189,8 @@ function FlowerCard({ source, isEditing, tempConfig, onToggle, onEdit, onConfigC
       )}
 
       {source.lastUsed && (
-        <p className="text-[9px] text-bee-dark/30 mt-1">
-          上次: {new Date(source.lastUsed).toLocaleString("zh-CN")}
+        <p className="text-[10px] text-bee-dark/30 mt-3 font-medium text-right">
+          上次采集: {new Date(source.lastUsed).toLocaleString("zh-CN")}
         </p>
       )}
     </motion.div>
