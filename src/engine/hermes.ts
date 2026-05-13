@@ -574,17 +574,21 @@ type 可选值:
       { role: "user", content: "请基于上述新情报提取知识图谱节点和关系。" },
     ];
 
+    console.log("[Hermes] buildKnowledgeGraph: calling LLM...");
+    
     const response = await this.chat(messages);
-    console.log("[Hermes] buildKnowledgeGraph raw response:", response.slice(0, 500));
+    console.log("[Hermes] buildKnowledgeGraph raw response length:", response.length);
 
     try {
-      const parsed = JSON.parse(this.extractJSON(response));
+      const jsonStr = this.extractJSON(response);
+      const parsed = JSON.parse(jsonStr);
       const nodes = Array.isArray(parsed.nodes) ? parsed.nodes : [];
       const edges = Array.isArray(parsed.edges) ? parsed.edges : [];
-      console.log(`[Hermes] Knowledge graph extracted: ${nodes.length} nodes, ${edges.length} edges`);
+      console.log(`[Hermes] buildKnowledgeGraph: extracted ${nodes.length} nodes, ${edges.length} edges`);
       return { nodes, edges };
     } catch (err) {
-      console.error("[Hermes] buildKnowledgeGraph JSON parse failed:", err, "\nRaw:", response.slice(0, 300));
+      console.error("[Hermes] buildKnowledgeGraph JSON parse failed:", err);
+      console.error("[Hermes] Raw response:", response.slice(0, 500));
       return { nodes: [], edges: [] };
     }
   }
@@ -719,18 +723,53 @@ ${html}
    * 从字符串中提取 JSON（处理可能的 markdown 代码块包裹）
    */
   private extractJSON(text: string): string {
-    // Try to extract from markdown code block
-    const jsonBlockMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-    if (jsonBlockMatch) return jsonBlockMatch[1].trim();
+    const trimmed = text.trim();
+    
+    // 1. 先尝试直接解析（最常见情况：LLM 直接输出了纯 JSON）
+    try {
+      JSON.parse(trimmed);
+      return trimmed;
+    } catch {
+      // 继续尝试提取
+    }
 
-    // Try to find raw JSON array or object
-    const arrayMatch = text.match(/\[[\s\S]*\]/);
+    // 2. 尝试从 markdown 代码块中提取
+    const jsonBlockMatch = trimmed.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+    if (jsonBlockMatch) {
+      console.log("[Hermes][extractJSON] Matched code block");
+      return jsonBlockMatch[1].trim();
+    }
+
+    // 3. 尝试匹配 JSON 对象（先于数组，因为对象内部包含数组时数组正则会错误匹配）
+    const objMatch = trimmed.match(/\{[\s\S]*\}/);
+    if (objMatch) {
+      try {
+        JSON.parse(objMatch[0]);
+        console.log("[Hermes][extractJSON] Matched object");
+        return objMatch[0];
+      } catch {
+        // 对象匹配到了但不是合法 JSON，继续
+      }
+    }
+
+    // 4. 尝试匹配 JSON 数组
+    const arrayMatch = trimmed.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      try {
+        JSON.parse(arrayMatch[0]);
+        console.log("[Hermes][extractJSON] Matched array");
+        return arrayMatch[0];
+      } catch {
+        // 数组匹配到了但不是合法 JSON，继续
+      }
+    }
+
+    // 5. 回退：返回对象匹配或数组匹配的原始结果（即使不是合法 JSON）
+    if (objMatch) return objMatch[0];
     if (arrayMatch) return arrayMatch[0];
 
-    const objMatch = text.match(/\{[\s\S]*\}/);
-    if (objMatch) return objMatch[0];
-
-    return text.trim();
+    console.warn("[Hermes][extractJSON] No JSON found in text, returning raw");
+    return trimmed;
   }
 }
 

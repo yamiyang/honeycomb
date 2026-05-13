@@ -176,6 +176,8 @@ export async function runSwarmResearch(researchId: string, objective: string) {
             researchSnap?.graph.edges || []
           );
 
+          console.log(`[Swarm] Graph update: ${graphUpdate.nodes.length} new nodes, ${graphUpdate.edges.length} new edges`);
+
           // 先添加所有节点，收集 label → id 映射
           const labelToId = new Map<string, string>();
           
@@ -207,8 +209,12 @@ export async function runSwarmResearch(researchId: string, objective: string) {
           }
 
           const updatedResearch = store().researches.find(r => r.id === researchId);
-          msg("queen", `🏠 知识图谱更新: **${updatedResearch?.graph.nodes.length || 0}** 个节点, **${updatedResearch?.graph.edges.length || 0}** 条关系`);
+          const totalNodes = updatedResearch?.graph.nodes.length || 0;
+          const totalEdges = updatedResearch?.graph.edges.length || 0;
+          console.log(`[Swarm] Graph after update: ${totalNodes} total nodes, ${totalEdges} total edges`);
+          msg("queen", `🏠 知识图谱更新: **${totalNodes}** 个节点, **${totalEdges}** 条关系`);
         } catch (err) {
+          console.error("[Swarm] Knowledge graph update error:", err);
           msg("system", `⚠️ 知识图谱构建异常: ${err instanceof Error ? err.message : "未知错误"}`);
         }
       }
