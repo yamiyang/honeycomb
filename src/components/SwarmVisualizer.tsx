@@ -1,9 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import BeeIcon from "./BeeIcon";
-import type { BeeAgent, KnowledgeGraph, KnowledgeNode } from "@/types";
+import type { BeeAgent, KnowledgeGraph, KnowledgeNode, Finding } from "@/types";
 
 interface SwarmVisualizerProps {
   bees: BeeAgent[];
@@ -118,6 +118,30 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
   const retiredCount = bees.length - activeBees.length;
   const [selectedNode, setSelectedNode] = useState<KnowledgeNode | null>(null);
   const [hoverData, setHoverData] = useState<{ type: "bee" | "node", data: BeeAgent | KnowledgeNode, x: number, y: number } | null>(null);
+  
+  const [sidebarTab, setSidebarTab] = useState<"bees" | "sources">("bees");
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+
+  // Compute source stats
+  const sourceStats = useMemo(() => {
+    const stats = new Map<string, { count: number; findings: Finding[] }>();
+    bees.forEach(b => {
+      b.findings.forEach(f => {
+        // Collect unique source names for this finding
+        const sourceNames = Array.from(new Set(f.sourceResults.map(sr => sr.sourceName)));
+        sourceNames.forEach(sn => {
+          if (!stats.has(sn)) {
+            stats.set(sn, { count: 0, findings: [] });
+          }
+          const stat = stats.get(sn)!;
+          stat.count += 1;
+          stat.findings.push(f);
+        });
+      });
+    });
+    // Sort by count descending
+    return Array.from(stats.entries()).sort((a, b) => b[1].count - a[1].count);
+  }, [bees]);
 
   // Build cells: center hive → bees → knowledge nodes → empty fill
   const nodes = graph.nodes.slice(-60);
@@ -250,10 +274,13 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
                 const colors = nodeColor[node.type] || nodeColor.concept;
                 const isSelected = selectedNode?.id === node.id;
                 return (
-                  <g key={`node-${node.id}`}
+                    <g key={`node-${node.id}`}
                     className="hex-cell transition-all"
                     style={{ cursor: "pointer" }}
-                    onClick={() => setSelectedNode(isSelected ? null : node)}
+                    onClick={() => {
+                      setSelectedNode(isSelected ? null : node);
+                      setSelectedSource(null);
+                    }}
                     onMouseMove={(e) => setHoverData({ type: "node", data: node, x: e.clientX, y: e.clientY })}
                     onMouseLeave={() => setHoverData(null)}
                   >
@@ -330,9 +357,9 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
           </div>
         )}
 
-        {/* Selected node detail */}
+        {/* Selected source detail */}
         <AnimatePresence>
-          {selectedNode && (
+          {selectedSource && (
             <motion.div
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -340,58 +367,62 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="absolute bottom-0 left-0 right-0 p-4 z-20"
             >
-              <div className="bg-white/90 backdrop-blur-xl p-5 rounded-2xl shadow-[0_-8px_30px_rgba(253,176,34,0.15)] border border-honey-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl drop-shadow-sm">{nodeEmoji[selectedNode.type]}</span>
-                  <span className="font-extrabold text-honey-900 text-lg">{selectedNode.label}</span>
-                  <span className="cute-tag shadow-sm ml-2"
-                    style={{
-                      background: nodeColor[selectedNode.type]?.fill,
-                      borderColor: nodeColor[selectedNode.type]?.stroke,
-                      color: nodeColor[selectedNode.type]?.stroke,
-                    }}>
-                    {nodeTypeNames[selectedNode.type]}
+              <div className="bg-white/90 backdrop-blur-xl p-5 rounded-2xl shadow-[0_-8px_30px_rgba(253,176,34,0.15)] border border-honey-200 max-h-[300px] flex flex-col">
+                <div className="flex items-center gap-3 mb-2 flex-shrink-0">
+                  <span className="text-2xl drop-shadow-sm">🌻</span>
+                  <span className="font-extrabold text-honey-900 text-lg">{selectedSource}</span>
+                  <span className="cute-tag shadow-sm ml-2 bg-[#eff6ff] border-[#38bdf8] text-[#38bdf8]">
+                    花田情报
                   </span>
                   <span className="ml-auto bg-honey-50 text-honey-600 px-2 py-1 rounded-lg text-xs font-bold border border-honey-100">
-                    R{selectedNode.round} | W{selectedNode.weight.toFixed(1)}
+                    共 {sourceStats.find(s => s[0] === selectedSource)?.[1].count || 0} 滴花蜜
                   </span>
-                  <button onClick={() => setSelectedNode(null)} className="w-8 h-8 rounded-full bg-honey-100 text-honey-600 hover:bg-honey-200 flex items-center justify-center transition-colors">✕</button>
+                  <button onClick={() => setSelectedSource(null)} className="w-8 h-8 rounded-full bg-honey-100 text-honey-600 hover:bg-honey-200 flex items-center justify-center transition-colors">✕</button>
                 </div>
-                <p className="text-bee-dark/80 leading-relaxed text-sm font-medium">{selectedNode.content}</p>
-                {graph.edges.filter(
-                  (e) => e.source === selectedNode.id || e.target === selectedNode.id ||
-                         e.source === selectedNode.label || e.target === selectedNode.label
-                ).length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-honey-100">
-                    {graph.edges
-                      .filter((e) => e.source === selectedNode.id || e.target === selectedNode.id ||
-                                     e.source === selectedNode.label || e.target === selectedNode.label)
-                      .slice(0, 6)
-                      .map((edge) => {
-                        const other = (edge.source === selectedNode.id || edge.source === selectedNode.label)
-                          ? graph.nodes.find((n) => n.id === edge.target || n.label === edge.target)?.label || edge.target
-                          : graph.nodes.find((n) => n.id === edge.source || n.label === edge.source)?.label || edge.source;
-                        return (
-                          <span key={edge.id} className="cute-tag bg-white border-honey-200 text-honey-700 shadow-sm flex items-center gap-1">
-                            <span className="text-[10px] opacity-60">{edge.type}</span> <span>→ {other}</span>
+                <div className="overflow-y-auto pr-2 space-y-2 flex-1 mt-2">
+                  {sourceStats.find(s => s[0] === selectedSource)?.[1].findings.map(f => (
+                    <div key={f.id} className="bg-honey-50/50 p-3 rounded-xl border border-honey-100">
+                      <div className="text-sm font-bold text-honey-900 mb-1">{f.title}</div>
+                      <div className="text-xs text-honey-800/70 mb-2">{f.summary}</div>
+                      <div className="flex flex-wrap gap-1">
+                        {f.tags.map(tag => (
+                          <span key={tag} className="text-[10px] bg-white border border-honey-200 text-honey-600 px-1.5 py-0.5 rounded-md">
+                            {tag}
                           </span>
-                        );
-                      })}
-                  </div>
-                )}
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Right: Bee list */}
-      <div className="w-[240px] flex-shrink-0 border-l border-honey-100 flex flex-col bg-white rounded-r-[20px] shadow-[-4px_0_24px_rgba(253,176,34,0.03)] z-10">
-        <div className="px-4 py-3 text-sm font-extrabold text-honey-800 border-b border-honey-100 flex-shrink-0 bg-honey-50/50 flex items-center gap-2">
-          <span className="text-xl">🐝</span> 蜜蜂列表 ({bees.length})
+      {/* Right: Bee / Source list */}
+      <div className="w-[260px] flex-shrink-0 border-l border-honey-100 flex flex-col bg-white rounded-r-[20px] shadow-[-4px_0_24px_rgba(253,176,34,0.03)] z-10">
+        <div className="flex border-b border-honey-100 flex-shrink-0 bg-honey-50/50">
+          <button
+            onClick={() => setSidebarTab("bees")}
+            className={`flex-1 py-3 text-sm font-extrabold flex items-center justify-center gap-1 transition-colors ${
+              sidebarTab === "bees" ? "text-honey-800 bg-white border-b-2 border-honey-400" : "text-honey-800/40 hover:bg-honey-50"
+            }`}
+          >
+            <span>🐝</span> 蜜蜂 ({bees.length})
+          </button>
+          <button
+            onClick={() => setSidebarTab("sources")}
+            className={`flex-1 py-3 text-sm font-extrabold flex items-center justify-center gap-1 transition-colors ${
+              sidebarTab === "sources" ? "text-honey-800 bg-white border-b-2 border-honey-400" : "text-honey-800/40 hover:bg-honey-50"
+            }`}
+          >
+            <span>🌻</span> 花田 ({sourceStats.length})
+          </button>
         </div>
+
         <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-honey-50/20">
-          {bees.map((bee) => (
+          {sidebarTab === "bees" && bees.map((bee) => (
             <div
               key={bee.id}
               className="flex items-center gap-3 p-2.5 rounded-xl border border-honey-100 bg-white hover:bg-honey-50 hover:border-honey-200 transition-colors shadow-sm group"
@@ -416,10 +447,43 @@ export default function SwarmVisualizer({ bees, graph }: SwarmVisualizerProps) {
               </div>
             </div>
           ))}
-          {bees.length === 0 && (
+          {sidebarTab === "bees" && bees.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-honey-800/30 text-xs p-6 gap-2">
               <span className="text-4xl grayscale opacity-50">💤</span>
               <span className="font-bold">等待派遣...</span>
+            </div>
+          )}
+
+          {sidebarTab === "sources" && sourceStats.map(([sourceName, stat]) => (
+            <div
+              key={sourceName}
+              onClick={() => {
+                setSelectedSource(selectedSource === sourceName ? null : sourceName);
+                setSelectedNode(null);
+              }}
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-colors shadow-sm cursor-pointer group ${
+                selectedSource === sourceName 
+                  ? "bg-honey-100 border-honey-400" 
+                  : "bg-white border-honey-100 hover:bg-honey-50 hover:border-honey-200"
+              }`}
+            >
+              <div className="w-8 h-8 rounded-full bg-honey-100 flex items-center justify-center text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
+                🌻
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-extrabold text-bee-dark text-xs truncate group-hover:text-honey-600 transition-colors">
+                  {sourceName}
+                </div>
+                <div className="text-honey-600/70 text-[10px] font-bold mt-0.5 flex items-center gap-1">
+                  <span>🍯 产出了 {stat.count} 滴花蜜</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          {sidebarTab === "sources" && sourceStats.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full text-honey-800/30 text-xs p-6 gap-2">
+              <span className="text-4xl grayscale opacity-50">🌱</span>
+              <span className="font-bold">还未从任何花田采到蜜...</span>
             </div>
           )}
         </div>

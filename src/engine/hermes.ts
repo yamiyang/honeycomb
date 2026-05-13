@@ -241,6 +241,8 @@ export class HermesAgent {
       graph: { nodes: KnowledgeNode[]; edges: KnowledgeEdge[] };
       recentMessages: { role: string; content: string }[];
       hasReport: boolean;
+      status: string;
+      beesStatus?: { name: string; status: string; task?: string }[];
     }
   ): Promise<QueenResponse> {
     const hasKnowledge = context.findings.length > 0 || context.graph.nodes.length > 0 || context.hasReport;
@@ -285,6 +287,18 @@ ${context.hasReport ? "✅ 已生成研究报告" : "未生成报告"}
 暂无已有知识。这是一个新的研究方向。
 `;
 
+    const isBusy = context.status === "searching" || context.status === "planning" || context.status === "expanding";
+    
+    // 构建蜜蜂状态描述
+    let beesStatusDigest = "暂无活跃蜜蜂";
+    if (context.beesStatus && context.beesStatus.length > 0) {
+      beesStatusDigest = context.beesStatus.map(b => `- ${b.name}: 当前状态为 ${b.status}${b.task && b.status === "searching" ? `，正在搜索「${b.task}」` : ""}`).join("\n");
+    }
+
+    const statusInfo = isBusy 
+      ? `\n⚠️ **特别注意**：当前蜂群正处于忙碌状态（${context.status}）。如果用户此时提问或下达指令，你可以参考以下蜜蜂们的具体状态来回复：\n${beesStatusDigest}\n你可以温和地提醒他们：你收到了指令，并结合蜜蜂们正在搜索的内容告诉他们蜜蜂带回最新情报后可能提供更多信息。你可以自由发挥，**由你来决定**是直接回答、继续闲聊，还是请他们稍等。通常在这种情况下，你只需要直接进行文字回复，无需再次调用 swarm_research 技能（因为蜂群已经在外面工作了）。` 
+      : "";
+
     const systemPrompt = `你是 HoneyComb 蜜探的蜂后（Queen Agent）🐝。
 
 ## 🪪 关于你自己（自我认知）
@@ -298,7 +312,7 @@ ${context.hasReport ? "✅ 已生成研究报告" : "未生成报告"}
 你要把"蜂巢"或"蜜探"替换为对应的产品定位关键词去搜索，而不是去搜索字面意义的"蜂巢APP"或"蜜探APP"。
 
 ## 你的身份
-你是一只智慧的蜂后，带领蜂群进行信息研究。你的研究目标是：「${context.objective}」
+你是一只智慧的蜂后，带领蜂群进行信息研究。你的研究目标是：「${context.objective}」${statusInfo}
 
 ## 你的能力
 1. **对话** — 你可以基于已有知识和用户自然交流、讨论、分析、总结
@@ -318,6 +332,7 @@ ${context.hasReport ? "✅ 已生成研究报告" : "未生成报告"}
 - 用户说"深入了解"、"搜索最新"等明确搜索意图
 
 ## 什么时候不应该调用 swarm_research
+- 蜂群当前正处于采集中（${isBusy ? "是，当前正在采集中" : "否"}）
 - 用户说"总结一下"、"帮我分析"、"你怎么看"
 - 用户在讨论已有的发现
 - 用户在闲聊

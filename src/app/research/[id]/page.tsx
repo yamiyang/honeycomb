@@ -43,19 +43,10 @@ export default function ResearchDetailPage() {
     return () => setActiveResearch(null);
   }, [id, setActiveResearch]);
 
-  const handleSend = useCallback(
+    const handleSend = useCallback(
     async (text: string) => {
       if (!research || isProcessing) return;
       addMessage(id, { role: "user", content: text });
-
-      // 如果蜂群正在搜索中，提醒用户等待
-      if (research.status === "searching" || research.status === "planning" || research.status === "expanding") {
-        addMessage(id, {
-          role: "queen",
-          content: `📩 收到指令：「${text}」\n蜜蜂们正在花田采集中，等她们回来我再处理你的请求~`,
-        });
-        return;
-      }
 
       setIsProcessing(true);
       try {
@@ -73,6 +64,12 @@ export default function ResearchDetailPage() {
             content: m.content,
           })),
           hasReport: !!research.report,
+          status: research.status,
+          beesStatus: research.bees.map(b => ({
+            name: b.name,
+            status: b.status,
+            task: b.task?.query || "无",
+          })),
         });
 
         // ─── 处理蜂后的回复 ───
