@@ -75,6 +75,13 @@ export default function ResearchDetailPage() {
         });
 
         // ─── 处理蜂后的回复 ───
+
+        console.log("[Page] Queen result:", {
+          hasContent: !!queenResult.content,
+          contentPreview: queenResult.content?.slice(0, 80),
+          toolCallsCount: queenResult.toolCalls.length,
+          toolNames: queenResult.toolCalls.map(tc => tc.function?.name),
+        });
         
         // 1. 如果蜂后有文字回复，显示出来
         if (queenResult.content) {
@@ -113,6 +120,7 @@ export default function ResearchDetailPage() {
         );
 
         if (reportCall && !researchCall) {
+          console.log("[Page] ✅ generate_report TOOL CALL detected! Generating report...");
           let focus = "";
           try {
             const args = JSON.parse(reportCall.function.arguments);
@@ -124,7 +132,7 @@ export default function ResearchDetailPage() {
           if (allFindings.length === 0) {
             addMessage(id, { role: "queen", content: "🐝 蜂巢里还没有花蜜呢，我得先派蜜蜂去采集信息才能酿报告哦~" });
           } else {
-            addMessage(id, { role: "queen", content: `📝 好的，蜂后正在重新酿造报告${focus ? `（聚焦角度：${focus}）` : ""}...请稍等 🍯` });
+            addMessage(id, { role: "system", content: `⏳ 正在调用报告引擎${focus ? `（聚焦：${focus}）` : ""}，预计需要 30-60 秒...` });
             try {
               const currentResearch = useResearchStore.getState().researches.find(r => r.id === id);
               const report = await hermes.generateReport(
@@ -135,9 +143,9 @@ export default function ResearchDetailPage() {
                 focus || undefined
               );
               setReport(id, report);
-              addMessage(id, { role: "queen", content: "✅ **新的采蜜报告酿好啦！** 请点击右侧「采蜜报告」标签品尝 🍯" });
+              addMessage(id, { role: "system", content: "✅ 报告已重新生成，请查看右侧「采蜜报告」标签。" });
             } catch (err) {
-              addMessage(id, { role: "system", content: `⚠️ 酿蜜失败: ${err instanceof Error ? err.message : "未知错误"}` });
+              addMessage(id, { role: "system", content: `⚠️ 报告生成失败: ${err instanceof Error ? err.message : "未知错误"}` });
             }
           }
         }
