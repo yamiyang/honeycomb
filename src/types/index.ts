@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 BeeSearch — Core Type Definitions
+   🐝 HoneyComb 蜜探 — Core Type Definitions
    
    Real AI-powered research system built on Hermes Agent.
    "花田" (Flower Fields) = pluggable information source system

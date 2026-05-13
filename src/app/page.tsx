@@ -15,7 +15,7 @@ export default function HomePage() {
   }, [initFlowerField]);
 
   function handleCreate() {
-    const id = createResearch("新研究", "待确定");
+    const id = createResearch("新采蜜计划", "等待蜂后指示");
     setActiveResearch(id);
     router.push(`/research/${id}`);
   }
@@ -27,7 +27,7 @@ export default function HomePage() {
 
   function handleDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation();
-    if (confirm("确定删除这个研究吗？")) {
+    if (confirm("确定要倒掉这罐蜂蜜吗？")) {
       deleteResearch(id);
     }
   }
@@ -45,10 +45,10 @@ export default function HomePage() {
             <span className="text-3xl animate-bee-float">🐝</span>
             <div>
               <h1 className="font-extrabold text-xl text-honey-600 tracking-tight">
-                BEESEARCH
+                HONEYCOMB
               </h1>
               <p className="text-[11px] text-honey-600/60 font-medium">
-                AI Swarm Search Engine
+                甜甜的 AI 采蜜助手 🌻
               </p>
             </div>
           </div>
@@ -63,7 +63,7 @@ export default function HomePage() {
             onClick={handleCreate}
             className="cute-btn flex items-center gap-2 px-6 py-2.5 bg-gradient-to-b from-honey-400 to-honey-500 text-white text-sm shadow-md"
           >
-            ＋ 新建研究
+            ＋ 派蜜蜂去采蜜
           </button>
         </div>
       </header>
@@ -89,18 +89,18 @@ export default function HomePage() {
 
             <div className="text-center">
               <h2 className="text-3xl font-extrabold text-bee-dark mb-3">
-                欢迎来到 BEESEARCH
+                欢迎来到 HoneyComb 蜜探
               </h2>
               <p className="text-base text-bee-dark/60 font-medium bg-white/50 px-6 py-1.5 rounded-full inline-block backdrop-blur-sm">
-                AI 蜂群情报搜索引擎
+                你的专属蜂群智能探索工具 🌻
               </p>
             </div>
 
             <div className="cute-card p-8 text-base text-bee-dark/70 text-center leading-loose max-w-md bg-white/80 backdrop-blur-sm">
               <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3 justify-center"><span className="text-2xl">🍯</span> 派出 AI 蜜蜂军团采集情报</div>
-                <div className="flex items-center gap-3 justify-center"><span className="text-2xl">⬡</span> 构建蜂巢知识图谱</div>
-                <div className="flex items-center gap-3 justify-center"><span className="text-2xl">📜</span> 生成深度研究报告</div>
+                <div className="flex items-center gap-3 justify-center"><span className="text-2xl">🍯</span> 派出勤劳的小蜜蜂去花田采蜜</div>
+                <div className="flex items-center gap-3 justify-center"><span className="text-2xl">⬡</span> 搭建漂漂亮亮的知识蜂巢</div>
+                <div className="flex items-center gap-3 justify-center"><span className="text-2xl">📜</span> 酿造香甜的采蜜报告</div>
               </div>
             </div>
 
@@ -108,14 +108,14 @@ export default function HomePage() {
               onClick={handleCreate}
               className="cute-btn px-10 py-4 bg-gradient-to-b from-honey-400 to-honey-500 text-white text-lg shadow-lg hover:shadow-xl mt-4"
             >
-              🚀 开启首次研究
+              🚀 开启首次寻花之旅
             </button>
           </motion.div>
         ) : (
           <div>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-extrabold text-bee-dark flex items-center gap-3">
-                📦 我的研究任务
+                📦 我的蜂蜜罐罐
                 <span className="cute-tag border-honey-200 text-honey-600 bg-honey-100 text-sm px-3 shadow-sm">
                   {researches.length}
                 </span>

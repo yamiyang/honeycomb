@@ -10,9 +10,9 @@ interface NewResearchModalProps {
 }
 
 const PRESETS = [
-  { title: "AI Agent 行业调研", objective: "深入研究 AI Agent 行业的市场规模、技术趋势、竞争格局和投资机会", emoji: "🤖" },
-  { title: "新能源汽车供应链", objective: "分析新能源汽车供应链的关键环节、核心企业和技术瓶颈", emoji: "🚗" },
-  { title: "AIGC 商业化路径", objective: "调研 AIGC 在各行业的商业化落地案例、盈利模式和市场前景", emoji: "🎨" },
+  { title: "AI Agent 花田寻宝", objective: "深入采摘 AI Agent 行业的市场规模、技术趋势、竞争格局", emoji: "🤖" },
+  { title: "新能源汽车花蜜", objective: "分析新能源汽车花田里的关键环节、核心花源和技术瓶颈", emoji: "🚗" },
+  { title: "AIGC 甜点探索", objective: "找找 AIGC 在各行业的甜点案例、盈利模式和市场前景", emoji: "🎨" },
 ];
 
 export default function NewResearchModal({ open, onClose, onCreate }: NewResearchModalProps) {
@@ -55,10 +55,10 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
               <span className="text-3xl animate-bee-float">📋</span>
               <div>
                 <h2 className="font-extrabold text-lg text-honey-600">
-                  新建研究任务
+                  新建采蜜计划
                 </h2>
                 <p className="text-xs text-honey-700/60 font-medium">
-                  派出蜂群为你采集情报
+                  派出蜂群为你采集花蜜
                 </p>
               </div>
               <button
@@ -73,7 +73,7 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
               {/* Presets */}
               <div className="mb-5">
                 <label className="text-xs text-bee-dark/60 mb-2 block font-bold">
-                  ⚡ 快速任务
+                  ⚡ 快速采蜜
                 </label>
                 <div className="flex gap-2 flex-wrap">
                   {PRESETS.map((p) => (
@@ -91,12 +91,12 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
               {/* Title */}
               <div className="mb-4">
                 <label className="text-xs text-bee-dark/60 mb-1.5 block font-bold">
-                  📜 研究标题
+                  📜 计划名称
                 </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="如：AI Agent 行业调研"
+                  placeholder="如：AI Agent 花田寻宝"
                   className="w-full px-4 py-3 rounded-2xl border-2 border-honey-100 bg-white text-sm focus:outline-none focus:border-honey-400 focus:bg-honey-50/30 transition-colors shadow-sm"
                 />
               </div>
@@ -104,12 +104,12 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
               {/* Objective */}
               <div className="mb-6">
                 <label className="text-xs text-bee-dark/60 mb-1.5 block font-bold">
-                  🎯 研究目标
+                  🎯 采蜜目标
                 </label>
                 <textarea
                   value={objective}
                   onChange={(e) => setObjective(e.target.value)}
-                  placeholder="详细描述你想研究的方向和关注点..."
+                  placeholder="详细描述你想让小蜜蜂去哪里找什么花蜜..."
                   rows={3}
                   className="w-full px-4 py-3 rounded-2xl border-2 border-honey-100 bg-white text-sm focus:outline-none focus:border-honey-400 focus:bg-honey-50/30 resize-none transition-colors shadow-sm"
                 />
@@ -129,7 +129,7 @@ export default function NewResearchModal({ open, onClose, onCreate }: NewResearc
                   className="cute-btn px-6 py-2.5 bg-gradient-to-r from-honey-400 to-honey-500 text-white text-sm font-bold shadow-md
                     disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  🐝 开始研究！
+                  🐝 飞吧，小蜜蜂！
                 </button>
               </div>
             </div>

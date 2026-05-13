@@ -101,7 +101,7 @@ function HtmlReportViewer({ html }: { html: string }) {
       )}
 
       <div className="flex items-center gap-3 flex-shrink-0 bg-white px-4 py-2.5 rounded-2xl border border-honey-100 shadow-sm">
-        <span className="text-sm font-bold text-honey-700 flex items-center gap-2"><span>📄</span> 研究报告</span>
+        <span className="text-sm font-bold text-honey-700 flex items-center gap-2"><span>📄</span> 采蜜报告</span>
         <div className="ml-auto flex gap-2">
           <button
             onClick={() => {
@@ -109,13 +109,13 @@ function HtmlReportViewer({ html }: { html: string }) {
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = "beesearch-research-report.html";
+              a.download = "honeycomb-honey-report.html";
               a.click();
               URL.revokeObjectURL(url);
             }}
             className="cute-btn px-4 py-1.5 bg-honey-50 hover:bg-honey-100 text-honey-800 text-xs border border-honey-200"
           >
-            ⬇️ 下载
+            ⬇️ 抱回家
           </button>
           <button
             onClick={() => {
@@ -125,7 +125,7 @@ function HtmlReportViewer({ html }: { html: string }) {
             }}
             className="cute-btn px-4 py-1.5 bg-honey-50 hover:bg-honey-100 text-honey-800 text-xs border border-honey-200"
           >
-            🔗 新窗口
+            🔗 大屏看
           </button>
         </div>
       </div>
@@ -135,7 +135,7 @@ function HtmlReportViewer({ html }: { html: string }) {
           srcDoc={html}
           sandbox="allow-same-origin allow-popups"
           className="w-full h-full bg-white rounded-[22px]"
-          title="研究报告"
+          title="采蜜报告"
         />
       </div>
     </div>
@@ -199,11 +199,11 @@ export default function ContentPanel({ bees, graph, report, status }: ContentPan
           {status === "error" && <span>💥</span>}
           <span>
             {status === "idle" && "待命"}
-            {status === "planning" && "规划中"}
-            {status === "searching" && "搜索中"}
-            {status === "analyzing" && "分析中"}
-            {status === "expanding" && "深化中"}
-            {status === "reporting" && "出报告"}
+            {status === "planning" && "找方向"}
+            {status === "searching" && "采蜜中"}
+            {status === "analyzing" && "尝味道"}
+            {status === "expanding" && "找更多花"}
+            {status === "reporting" && "酿蜜中"}
             {status === "completed" && "完成!"}
             {status === "paused" && "暂停"}
             {status === "error" && "出错"}
@@ -229,7 +229,7 @@ export default function ContentPanel({ bees, graph, report, status }: ContentPan
                   <div className="text-center bg-honey-50/50 p-6 rounded-3xl border border-honey-100">
                     <p className="text-base font-extrabold mb-2 text-honey-800/60">蜜蜂们正在蜂巢里等待</p>
                     <p className="text-xs text-honey-800/40">
-                      输入研究目标即可派出蜂群
+                      告诉蜂后你想找什么花蜜
                     </p>
                   </div>
                 </div>
@@ -254,7 +254,7 @@ export default function ContentPanel({ bees, graph, report, status }: ContentPan
                 <div className="h-full cute-card flex flex-col items-center justify-center text-honey-800/40">
                   <div className="text-center">
                     <span className="text-5xl mb-4 block animate-bounce opacity-50 grayscale">📝</span>
-                    <p className="font-extrabold text-honey-800/60">报告生成中...</p>
+                    <p className="font-extrabold text-honey-800/60">小蜜蜂正在拼命酿蜜中...</p>
                   </div>
                 </div>
               )}

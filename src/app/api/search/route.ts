@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 BeeSearch — Search Proxy API Route
+   🐝 HoneyComb 蜜探 — Search Proxy API Route
    
    解决浏览器 CORS 限制。
    前端调用 /api/search，由服务端代理请求各信息源 API。

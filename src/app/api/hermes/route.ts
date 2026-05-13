@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 BeeSearch — Hermes (LLM) Proxy API Route
+   🐝 HoneyComb 蜜探 — Hermes (LLM) Proxy API Route
    
    服务端代理 LLM 调用，避免 API Key 暴露在浏览器端。
    ============================================================ */
@@ -9,9 +9,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { messages, tools, temperature, max_tokens } = body as {
+    const { messages, tools, tool_choice, temperature, max_tokens } = body as {
       messages: { role: string; content: string }[];
       tools?: unknown[];
+      tool_choice?: string | object;
       temperature?: number;
       max_tokens?: number;
     };
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     if (tools && tools.length > 0) {
       payload.tools = tools;
-      payload.tool_choice = "auto";
+      payload.tool_choice = tool_choice || "auto";
     }
 
     const response = await fetch(`${baseUrl}/chat/completions`, {

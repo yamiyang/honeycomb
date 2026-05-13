@@ -13,7 +13,7 @@ interface ChatPanelProps {
 }
 
 const roleConfig = {
-  user: { emoji: "🧑‍💻", label: "研究员", bubbleClass: "bg-honey-100 text-bee-dark rounded-[20px] rounded-br-sm shadow-sm border border-honey-200 ml-auto" },
+  user: { emoji: "🧑‍💻", label: "养蜂人", bubbleClass: "bg-honey-100 text-bee-dark rounded-[20px] rounded-br-sm shadow-sm border border-honey-200 ml-auto" },
   queen: { emoji: "👑", label: "蜂后", bubbleClass: "bg-honey-50 text-bee-dark rounded-[20px] rounded-tl-sm shadow-sm border border-honey-100" },
   bee: { emoji: "🐝", label: "蜜蜂", bubbleClass: "bg-honey-50 text-bee-dark rounded-[20px] rounded-tl-sm shadow-sm border border-honey-100" },
   system: { emoji: "⚙️", label: "系统", bubbleClass: "bg-gray-50/80 text-bee-dark/70 rounded-[16px] border border-gray-100/50 text-xs shadow-sm" },
@@ -53,8 +53,8 @@ export default function ChatPanel({ messages, onSend, onStop, isProcessing }: Ch
             <span className="text-6xl animate-bee-float opacity-40 grayscale drop-shadow-sm">🐝</span>
             <div className="bg-white/80 backdrop-blur-sm p-5 rounded-3xl border border-honey-100 shadow-sm text-center">
               <p className="text-sm leading-relaxed font-bold text-bee-dark/60">
-                输入研究目标<br />
-                蜂群将为你采集情报
+                告诉蜂后你想找什么花蜜<br />
+                蜂群立刻为你采集！🍯
               </p>
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function ChatPanel({ messages, onSend, onStop, isProcessing }: Ch
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isProcessing ? "蜂群工作中，请稍候..." : "输入你想研究的问题..."}
+            placeholder={isProcessing ? "蜂群采蜜中，请稍候..." : "输入你想寻找的花蜜线索..."}
             disabled={isProcessing}
             rows={1}
             className="flex-1 resize-none bg-transparent px-3 py-2 text-sm text-bee-dark
@@ -151,7 +151,7 @@ export default function ChatPanel({ messages, onSend, onStop, isProcessing }: Ch
             <button
               onClick={onStop}
               className="cute-btn flex-shrink-0 w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center shadow-sm"
-              title="停止研究"
+              title="召唤蜂群回巢"
             >
               <span className="text-lg">■</span>
             </button>

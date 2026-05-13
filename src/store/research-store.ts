@@ -1,5 +1,5 @@
 /* ============================================================
-   🐝 BeeSearch — Global Research Store (Zustand)
+   🐝 HoneyComb 蜜探 — Global Research Store (Zustand)
    
    管理：研究项目、蜜蜂状态、知识图谱、信息源配置
    ============================================================ */
@@ -546,7 +546,7 @@ export const useResearchStore = create<ResearchStore>()(
       clearEvents: () => set({ events: [] }),
     }),
     {
-      name: "beesearch-research-store",
+      name: "honeycomb-research-store",
       version: 8, // v8: 花田数据源改为后端 API 管理，不再持久化到 localStorage
       partialize: (state) => ({
         researches: state.researches,

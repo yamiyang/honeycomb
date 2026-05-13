@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "🐝 BeeHive — 蜂群智能研究平台",
-  description: "Swarm Intelligence Research Platform - 启发式扩散情报搜索与行业调研工具",
+  title: "🐝 HoneyComb 蜜探 — 你的专属蜂群智能探索工具",
+  description: "让小蜜蜂为你采蜜",
 };
 
 export default function RootLayout({

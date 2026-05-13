@@ -11,13 +11,13 @@ interface ResearchCardProps {
 
 const statusConfig: Record<string, { label: string; emoji: string; color: string; bg: string; border: string }> = {
   idle: { label: "待命", emoji: "💤", color: "text-gray-600", bg: "bg-gray-50", border: "border-gray-200" },
-  planning: { label: "规划中", emoji: "🧠", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
-  searching: { label: "搜索中", emoji: "🔍", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-  analyzing: { label: "分析中", emoji: "📊", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
-  expanding: { label: "深化中", emoji: "🔄", color: "text-cyan-600", bg: "bg-cyan-50", border: "border-cyan-200" },
-  reporting: { label: "出报告", emoji: "📝", color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200" },
-  completed: { label: "已完成", emoji: "✨", color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
-  paused: { label: "已暂停", emoji: "⏸️", color: "text-gray-500", bg: "bg-gray-100", border: "border-gray-200" },
+  planning: { label: "找方向", emoji: "🧠", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+  searching: { label: "采蜜中", emoji: "🔍", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+  analyzing: { label: "尝味道", emoji: "📊", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+  expanding: { label: "找更多花", emoji: "🔄", color: "text-cyan-600", bg: "bg-cyan-50", border: "border-cyan-200" },
+  reporting: { label: "酿蜜中", emoji: "📝", color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200" },
+  completed: { label: "完成!", emoji: "✨", color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
+  paused: { label: "暂停", emoji: "⏸️", color: "text-gray-500", bg: "bg-gray-100", border: "border-gray-200" },
   error: { label: "出错", emoji: "💥", color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
 };
 

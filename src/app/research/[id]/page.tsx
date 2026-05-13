@@ -8,6 +8,7 @@ import ChatPanel from "@/components/ChatPanel";
 import ContentPanel from "@/components/ContentPanel";
 import FlowerFieldPanel from "@/components/FlowerFieldPanel";
 import { runSwarmResearch, stopResearch } from "@/engine/swarm";
+import { getHermes } from "@/engine/hermes";
 
 type RightPanel = "content" | "flowers";
 
@@ -29,7 +30,7 @@ export default function ResearchDetailPage() {
     if (!research) return;
     const stopped = stopResearch(id);
     if (stopped) {
-      addMessage(id, { role: "system", content: "🛑 正在停止研究..." });
+      addMessage(id, { role: "system", content: "🛑 正在召唤蜂群回巢..." });
     }
   }, [id, research, addMessage]);
 
@@ -47,27 +48,76 @@ export default function ResearchDetailPage() {
       if (!research || isProcessing) return;
       addMessage(id, { role: "user", content: text });
 
-      // First message → mark title as pending (蜂后会在 swarm 引擎中自动总结)
-      const isFirstMessage = research.messages.length === 0;
-      if (isFirstMessage) {
-        updateResearchMeta(id, "🐝 蜂后正在理解…", text);
-      }
-
-      if (research.status === "idle" || research.status === "completed" || research.status === "error") {
-        setIsProcessing(true);
-        try {
-          await runSwarmResearch(id, text);
-        } catch (err) {
-          console.error("Swarm error:", err);
-          addMessage(id, { role: "system", content: `💥 研究出错: ${err instanceof Error ? err.message : "未知错误"}` });
-        }
-        setIsProcessing(false);
-      } else {
+      // 如果蜂群正在搜索中，提醒用户等待
+      if (research.status === "searching" || research.status === "planning" || research.status === "expanding") {
         addMessage(id, {
           role: "queen",
-          content: `📩 收到指令：「${text}」\n当前研究正在进行中，请等待完成后再发起新的研究。`,
+          content: `📩 收到指令：「${text}」\n蜜蜂们正在花田采集中，等她们回来我再处理你的请求~`,
         });
+        return;
       }
+
+      setIsProcessing(true);
+      try {
+        const hermes = getHermes();
+        const allFindings = research.bees.flatMap(b => b.findings);
+
+        // ─── 蜂后对话（Tool Calling Agent） ───
+        // 蜂后自己决定：直接回答 or 调用 swarm_research skill
+        const queenResult = await hermes.queenChat(text, {
+          objective: research.objective,
+          findings: allFindings,
+          graph: research.graph,
+          recentMessages: research.messages.slice(-8).map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+          hasReport: !!research.report,
+        });
+
+        // ─── 处理蜂后的回复 ───
+        
+        // 1. 如果蜂后有文字回复，显示出来
+        if (queenResult.content) {
+          addMessage(id, { role: "queen", content: queenResult.content });
+        }
+
+        // 2. 如果蜂后调用了 swarm_research skill，启动蜂群搜索
+        const researchCall = queenResult.toolCalls.find(
+          tc => tc.function?.name === "swarm_research"
+        );
+
+        if (researchCall) {
+          let query = text; // 默认用用户原文
+          try {
+            const args = JSON.parse(researchCall.function.arguments);
+            query = args.query || text;
+            if (args.reason && !queenResult.content) {
+              // 如果蜂后没有文字回复但给了 reason，用 reason 作为过渡消息
+              addMessage(id, { role: "queen", content: `🐝 ${args.reason}\n\n正在派出蜜蜂去搜索...` });
+            }
+          } catch {
+            // JSON 解析失败，用原文搜索
+          }
+
+          // 首次搜索时更新标题
+          if (research.messages.length === 0 || (!allFindings.length && !research.report)) {
+            updateResearchMeta(id, "🐝 蜂后正在理解…", query);
+          }
+
+          await runSwarmResearch(id, query);
+        }
+
+        // 3. 如果蜂后既没回复也没调用 tool（异常情况），给个兜底
+        if (!queenResult.content && !researchCall) {
+          addMessage(id, { role: "queen", content: "🐝 嗯...让我想想。你能再说详细一点吗？" });
+        }
+
+      } catch (err) {
+        console.error("Handle send error:", err);
+        addMessage(id, { role: "system", content: `💥 出错: ${err instanceof Error ? err.message : "未知错误"}` });
+      }
+      setIsProcessing(false);
     },
     [research, isProcessing, id, addMessage, updateResearchMeta]
   );
@@ -77,9 +127,9 @@ export default function ResearchDetailPage() {
       <div className="min-h-screen bg-honey-50 flex items-center justify-center font-sans relative overflow-hidden">
         <div className="cute-card p-10 text-center max-w-sm">
           <div className="text-6xl mb-6 animate-bee-float">🐝❓</div>
-          <p className="text-bee-dark/60 mb-6 font-bold text-lg">找不到这个研究任务</p>
+          <p className="text-bee-dark/60 mb-6 font-bold text-lg">找不到这罐蜂蜜</p>
           <button onClick={() => router.push("/")} className="cute-btn px-6 py-2.5 bg-honey-400 text-bee-dark shadow-sm w-full">
-            🏠 返回首页
+            🏠 返回花田
           </button>
         </div>
       </div>
@@ -106,9 +156,9 @@ export default function ResearchDetailPage() {
           <span className="text-2xl drop-shadow-sm">🐝</span>
           <div className="flex-1 min-w-0">
             <h1 className="font-extrabold text-base text-honey-800 truncate">
-              {research.title === "新研究" ? "🐝 新研究 — 输入你想研究的内容" : research.title}
+              {research.title === "新采蜜计划" ? "🐝 新采蜜计划 — 告诉蜂后你想找什么花蜜" : research.title}
             </h1>
-            {research.objective !== "待确定" && (
+            {research.objective !== "等待蜂后指示" && (
               <p className="text-xs text-honey-600/70 truncate font-medium mt-0.5">
                 {research.objective}
               </p>
@@ -123,15 +173,15 @@ export default function ResearchDetailPage() {
                   animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
                 />
-                <span className="text-xs font-bold text-honey-700">搜索中</span>
+                <span className="text-xs font-bold text-honey-700">采蜜中</span>
               </div>
               <div className="w-px h-3 bg-honey-200" />
               <button
                 onClick={handleStop}
                 className="text-red-500 hover:text-red-600 font-bold text-xs flex items-center gap-1 transition-colors"
-                title="停止研究"
+                title="召唤蜂群回巢"
               >
-                ■ 停止
+                ■ 召回
               </button>
             </div>
           )}
@@ -145,7 +195,7 @@ export default function ResearchDetailPage() {
                   : "text-honey-600/60 hover:text-honey-700"
               }`}
             >
-              📊 研究
+              📊 蜂巢
             </button>
             <button
               onClick={() => setRightPanel("flowers")}
