@@ -62,7 +62,7 @@ export const stackoverflowAdapter: FlowerAdapter = {
       sourceType: "stackoverflow" as const,
       sourceName: "StackOverflow",
       title: decodeHtml(item.title),
-      content: `${decodeHtml(item.title)}\n\nTags: ${item.tags.join(", ")}\nScore: ${item.score} | Answers: ${item.answer_count} ${item.is_answered ? "✅" : ""}\nViews: ${item.view_count}\n\n${item.body_markdown ? item.body_markdown.slice(0, 500) : ""}`,
+      content: `${decodeHtml(item.title)}\n\nTags: ${item.tags.join(", ")}\nScore: ${item.score} | Answers: ${item.answer_count} ${item.is_answered ? "✅" : ""}\nViews: ${item.view_count}\n\n${item.body_markdown ? item.body_markdown.slice(0, 2000) : ""}`,
       url: item.link,
       author: item.owner?.display_name || "Anonymous",
       publishedAt: new Date(item.creation_date * 1000).toISOString(),

@@ -143,7 +143,7 @@ export const youtubeAdapter: FlowerAdapter = {
         sourceType: "youtube" as const,
         sourceName: "YouTube Trending",
         title: `📺 ${snippet.title}`,
-        content: `${snippet.description?.slice(0, 300) || ""}\n\n频道: ${snippet.channelTitle}\n观看: ${formatNumber(stats.viewCount)} | 点赞: ${formatNumber(stats.likeCount)}`,
+        content: `${snippet.description?.slice(0, 1000) || ""}\n\n频道: ${snippet.channelTitle}\n观看: ${formatNumber(stats.viewCount)} | 点赞: ${formatNumber(stats.likeCount)}`,
         url: `https://www.youtube.com/watch?v=${item.id}`,
         author: snippet.channelTitle,
         publishedAt: snippet.publishedAt,

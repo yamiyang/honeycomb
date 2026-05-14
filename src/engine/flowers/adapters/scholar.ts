@@ -134,7 +134,7 @@ async function searchViaProxy(
     sourceType: "scholar" as const,
     sourceName: "CrossRef/Scholar",
     title: `🎓 ${Array.isArray(item.title) ? item.title[0] : item.title || "Untitled"}`,
-    content: `${item.abstract?.replace(/<[^>]+>/g, "")?.slice(0, 500) || "No abstract"}\n\nAuthors: ${item.author?.map((a: { given?: string; family?: string }) => `${a.given || ""} ${a.family || ""}`).join(", ") || "N/A"}\nDOI: ${item.DOI || "N/A"}\nPublished: ${item.published?.["date-parts"]?.[0]?.join("-") || "N/A"}`,
+    content: `${item.abstract?.replace(/<[^>]+>/g, "")?.slice(0, 2000) || "No abstract"}\n\nAuthors: ${item.author?.map((a: { given?: string; family?: string }) => `${a.given || ""} ${a.family || ""}`).join(", ") || "N/A"}\nDOI: ${item.DOI || "N/A"}\nPublished: ${item.published?.["date-parts"]?.[0]?.join("-") || "N/A"}`,
     url: item.URL || `https://doi.org/${item.DOI}`,
     author: item.author?.map((a: { given?: string; family?: string }) => `${a.given || ""} ${a.family || ""}`).join(", "),
     publishedAt: item.published?.["date-parts"]?.[0]?.join("-"),

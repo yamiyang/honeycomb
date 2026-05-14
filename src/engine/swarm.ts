@@ -24,6 +24,7 @@
 
 import { useResearchStore } from "@/store/research-store";
 import { getHermes, getBeeHermes } from "./hermes";
+import { deepRead } from "./deep-reader";
 import { flowerField } from "./flowers";
 import type { SearchTask, SourceResult, Finding } from "@/types";
 
@@ -435,6 +436,49 @@ async function executeSearchRound(
 
       msg("bee", `🍯 找到了 ${results.length} 滴花蜜，正在尝味道...`, beeName);
       store().updateBeeStatus(researchId, beeId, "analyzing");
+
+      // ─── 深度阅读：AI 评估哪些结果值得深入阅读全文 ───
+      try {
+        const hermes = getHermes(); // 用蜂后模型做评估
+        const deepReadIndices = await hermes.evaluateDeepRead(
+          objective,
+          results.map(r => ({ title: r.title, content: r.content, url: r.url, sourceName: r.sourceName }))
+        );
+
+        if (deepReadIndices.length > 0) {
+          msg("bee", `📖 发现 ${deepReadIndices.length} 篇值得深读的内容，正在细读全文...`, beeName);
+
+          // 并行深度阅读
+          const deepReadPromises = deepReadIndices.map(async (idx) => {
+            const result = results[idx];
+            if (!result?.url) return;
+            try {
+              const fullContent = await deepRead(result.url);
+              if (fullContent.success && fullContent.content.length > result.content.length) {
+                console.log(`[Swarm] Deep read ${result.url}: ${result.content.length} → ${fullContent.charCount} chars${fullContent.truncated ? " (truncated)" : ""}`);
+                // 替换原始摘要为全文内容
+                results[idx] = {
+                  ...result,
+                  content: fullContent.content,
+                  metadata: { ...result.metadata, deepRead: true, originalLength: fullContent.charCount },
+                };
+              }
+            } catch (err) {
+              console.warn(`[Swarm] Deep read failed for ${result.url}:`, err);
+            }
+          });
+
+          await Promise.allSettled(deepReadPromises);
+
+          const deepReadCount = results.filter(r => r.metadata?.deepRead).length;
+          if (deepReadCount > 0) {
+            msg("bee", `✅ 深度阅读了 ${deepReadCount} 篇全文`, beeName);
+          }
+        }
+      } catch (err) {
+        console.warn("[Swarm] Deep read evaluation failed:", err);
+        // 深读失败不阻塞主流程
+      }
 
       // 蜜蜂分析结果（使用快速模型）
       const analysis = await beeHermes.analyzeResults(

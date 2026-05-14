@@ -117,7 +117,7 @@ async function fetchExtracts(
     for (const [id, page] of Object.entries(pages)) {
       const p = page as { extract?: string };
       if (p.extract) {
-        result[Number(id)] = p.extract.slice(0, 800);
+        result[Number(id)] = p.extract.slice(0, 2000);
       }
     }
 
