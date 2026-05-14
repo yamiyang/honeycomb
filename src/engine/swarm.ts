@@ -422,19 +422,29 @@ async function executeSearchRound(
         ? resolvedSourceIds 
         : allSources.map(s => s.id);
 
-      const results: SourceResult[] = await flowerField.searchMultiple(
-        sourceIdsToSearch,
-        task.query,
-        { maxResults: 5, sortBy: "relevance" }
-      );
+      // 根据任务模式选择搜索还是浏览
+      let results: SourceResult[];
+      if (task.mode === "browse") {
+        msg("bee", `🦋 ${beeName}正在花田里随意逛逛，看看最新动态...`, beeName);
+        results = await flowerField.browseMultiple(
+          sourceIdsToSearch,
+          { limit: 8 }
+        );
+      } else {
+        results = await flowerField.searchMultiple(
+          sourceIdsToSearch,
+          task.query,
+          { maxResults: 5, sortBy: "relevance" }
+        );
+      }
 
       if (results.length === 0) {
-        msg("bee", `😔 绕着花田飞了一圈，没找到关于「${task.query}」的花蜜`, beeName);
+        msg("bee", `😔 绕着花田飞了一圈，${task.mode === "browse" ? "花田里没什么新鲜事" : `没找到关于「${task.query}」的花蜜`}`, beeName);
         store().updateBeeStatus(researchId, beeId, "resting");
         return;
       }
 
-      msg("bee", `🍯 找到了 ${results.length} 滴花蜜，正在尝味道...`, beeName);
+      msg("bee", `🍯 ${task.mode === "browse" ? "逛到了" : "找到了"} ${results.length} 滴花蜜，正在尝味道...`, beeName);
       store().updateBeeStatus(researchId, beeId, "analyzing");
 
       // ─── 深度阅读：AI 评估哪些结果值得深入阅读全文 ───
@@ -453,7 +463,7 @@ async function executeSearchRound(
             const result = results[idx];
             if (!result?.url) return;
             try {
-              const fullContent = await deepRead(result.url);
+              const fullContent = await deepRead(result.url, 6000, result.sourceId);
               if (fullContent.success && fullContent.content.length > result.content.length) {
                 console.log(`[Swarm] Deep read ${result.url}: ${result.content.length} → ${fullContent.charCount} chars${fullContent.truncated ? " (truncated)" : ""}`);
                 // 替换原始摘要为全文内容

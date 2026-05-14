@@ -5,7 +5,7 @@
     "name": "Google Search",
     "icon": "🔍",
     "description": "谷歌网页搜索 — 全球最大搜索引擎",
-    "status": "inactive",
+    "status": "active",
     "config": {},
     "capabilities": [
       "search",
@@ -19,8 +19,10 @@
     "name": "Twitter/X",
     "icon": "🐦",
     "description": "Twitter/X 社交媒体 — 实时信息、观点、趋势",
-    "status": "inactive",
-    "config": {},
+    "status": "active",
+    "config": {
+      "cookie": "guest_id_marketing=v1%3A174676997175347307; guest_id_ads=v1%3A174676997175347307; guest_id=v1%3A174676997175347307; __cuid=e3b0a2b9de9949b38cdef40ae0b8c48d; _twitter_sess=BAh7BiIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%250ASGFzaHsABjoKQHVzZWR7AA%253D%253D--1164b91ac812d853b877e93ddb612b7471bebc74; kdt=cAanZCANhufF0uFIWmuQ1TOf66riezlT9jxsEWDJ; _ga=GA1.1.1269904946.1755084866; _ga_BLY4P7T5KW=GS2.1.s1755084866$o1$g1$t1755084963$j50$l0$h0; personalization_id=\"v1_GYrSp2KI5kRasH2IRS+P6Q==\"; g_state={\"i_l\":0,\"i_ll\":1770122105020}; auth_token=812a2618e68558efc17d3a589c8d93d1a51f6545; ct0=ebb8db94fb67c990ff69d1871cfc38b1cfdffabd59d449c6ec0bd98d16fabf599a1652233abef977e977b60eb4654d965825bfce32775f0ea257f9097b1db41cb5920fbbcad4c4f899c2209fd4072a14; twid=u%3D1325732455962177537; __cf_bm=W52boSdiIiaX2NsLu3bn7YOnWlzYPxUm1U3fF.27tEs-1778758066.2297134-1.0.1.1-EcZSmWAJ0DyhfHqImTiyUq6EzgYdaIv783ziTHKZXActOJn3NtxEarY9A.ZKEVviHu35TsgTL5wHb2APCitLB7nA6yonxQg4hgpZsH_PuInGePPhS1edCNIbknZkfhY6; lang=zh-cn"
+    },
     "capabilities": [
       "search",
       "trending",
@@ -183,7 +185,7 @@
     "name": "Bilibili",
     "icon": "📺",
     "description": "B站 — 中文视频内容搜索（免费）",
-    "status": "inactive",
+    "status": "active",
     "config": {},
     "capabilities": [
       "search",

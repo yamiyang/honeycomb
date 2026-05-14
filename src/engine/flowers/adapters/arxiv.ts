@@ -44,6 +44,33 @@ export const arxivAdapter: FlowerAdapter = {
     // arXiv 不需要 API key
     return true;
   },
+
+  async getDetail(url: string): Promise<string | null> {
+    // arXiv → ar5iv HTML 版全文
+    const match = url.match(/arxiv\.org\/abs\/(.+)/);
+    if (!match) return null;
+    const arxivId = match[1];
+    try {
+      const response = await proxyFetch(`https://ar5iv.labs.arxiv.org/html/${arxivId}`, {
+        headers: { Accept: "text/html" },
+      });
+      if (!response.ok) return null;
+      const html = await response.text();
+      // 提取纯文本（去 HTML 标签）
+      const text = html
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[\s\S]*?<\/style>/gi, "")
+        .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+        .replace(/<header[\s\S]*?<\/header>/gi, "")
+        .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      return text.slice(0, 8000);
+    } catch {
+      return null;
+    }
+  },
 };
 
 /**

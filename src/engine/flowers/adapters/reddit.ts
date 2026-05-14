@@ -85,6 +85,39 @@ export const redditAdapter: FlowerAdapter = {
     return true;
   },
 
+  async getDetail(url: string): Promise<string | null> {
+    // Reddit JSON API：在 URL 后加 .json
+    try {
+      const jsonUrl = url.endsWith("/") ? url + ".json" : url + "/.json";
+      const response = await proxyFetch(jsonUrl, {
+        headers: { "User-Agent": "HoneyComb/1.0" },
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) return null;
+
+      // 帖子内容
+      const post = data[0]?.data?.children?.[0]?.data;
+      if (!post) return null;
+      let content = `# ${post.title}\n\n${post.selftext || ""}\n\nScore: ${post.score} | Comments: ${post.num_comments}\n`;
+
+      // 热门评论（前 5 条）
+      const comments = data[1]?.data?.children?.slice(0, 5) || [];
+      if (comments.length > 0) {
+        content += "\n--- TOP COMMENTS ---\n";
+        for (const c of comments) {
+          const cData = c.data;
+          if (cData?.body) {
+            content += `\n[${cData.author}] (score: ${cData.score}): ${cData.body.slice(0, 500)}\n`;
+          }
+        }
+      }
+      return content.slice(0, 8000);
+    } catch {
+      return null;
+    }
+  },
+
   async trending(config: SourceConfig, options?: TrendingOptions): Promise<SourceResult[]> {
     const limit = options?.limit || 20;
     const subreddit = options?.category || "all";

@@ -162,9 +162,10 @@ export type BeeStatus =
 /** 搜索任务 — 蜂后分配给蜜蜂的具体任务 */
 export interface SearchTask {
   id: string;
-  query: string;                   // 搜索查询
+  query: string;                   // 搜索查询（browse 模式下可为空）
   sourceIds: string[];             // 要搜索哪些信息源
   rationale: string;               // 为什么搜索这个
+  mode?: "search" | "browse";      // search=关键词搜索（默认），browse=无关键词浏览最新/热门
   parentTaskId?: string;           // 深化自哪个任务
   round: number;
   status: "pending" | "active" | "completed" | "failed";

@@ -55,7 +55,7 @@ const QUEEN_SKILL_RESEARCH: HermesTool = {
       properties: {
         query: {
           type: "string",
-          description: "搜索研究的核心问题/方向。必须是能在搜索引擎中有效执行的查询。重要：如果用户提到的是'蜂巢'、'HoneyComb'、'蜜探'、'我们的APP'等自我指代，必须将其翻译为实际的产品定位描述。对于涉及最新动态的搜索，请在查询中加入当前年份或具体时间限制以保证时效性。",
+          description: "搜索研究的核心问题/方向。⚠️ 这必须是一个能在搜索引擎中产生高质量结果的有效查询，而不是用户原话的复读。你需要理解用户的真实意图，将模糊表达转化为精准的搜索词。例如：用户说'本周大事件'→ 你应该生成'2026年5月 重大新闻'或'latest news May 2026'这样的具体查询；用户说'最近AI有什么进展'→'AI breakthrough 2026'。如果用户提到的是'蜂巢'、'HoneyComb'、'蜜探'、'我们的APP'等自我指代，必须将其翻译为实际的产品定位描述。",
         },
         reason: {
           type: "string",
@@ -506,23 +506,42 @@ ${knowledgeSection}
 
 当前系统时间: ${currentTime}
 
-规则：
+## ⚠️ 核心原则：你是搜索策略专家，不是复读机
+
+用户的表达往往是模糊的、口语化的。你必须理解用户的真实意图，将其转化为搜索引擎能产生高质量结果的具体查询。
+
+**绝对不要**把用户原话直接当成搜索词！例如：
+- 用户说"本周大事件" → ❌ 搜"本周大事件" → ✅ 搜"${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate() - 7 > 0 ? now.getDate() - 7 : 1}-${now.getDate()}日 重大新闻"、"latest world news ${now.getFullYear()}"、"科技新闻 本周"
+- 用户说"最近AI有什么进展" → ❌ 搜"最近AI进展" → ✅ 搜"AI breakthrough ${now.getFullYear()}"、"人工智能 最新突破 ${now.getMonth() + 1}月"
+- 用户说"帮我看看竞品" → ❌ 搜"竞品" → ✅ 根据上下文搜具体的产品类别和竞品名称
+- 用户要看时事新闻 → 应该用不带特定关键词的新闻类搜索，如 "top news today"、"breaking news ${currentTime}"、各垂直领域的最新动态
+
+## 规划规则
 1. 将目标分解为 3-6 个互补的搜索方向
-2. 每个搜索方向应该有明确的搜索查询 (query)
-3. ⚠️ **信息多样性原则**：必须根据可用信息源的特性进行多样化分配。避免所有任务都集中在 Web Search / DuckDuckGo 等通用引擎上。如果有特定的学术、社交媒体、代码库、RSS等垂直源，应该针对性地为它们分配相应的探查任务，以获得不同维度的信息。
-4. ⚠️ **时效性原则**：如果研究目标涉及最新动态、新闻、技术发展或趋势，请务必在 query 中加上具体的年份（如 "${now.getFullYear()}" 或 "${now.getFullYear()}年${now.getMonth() + 1}月"）以确保搜索结果的时效性。
-5. 解释为什么这个方向值得探索 (rationale)
+2. 每个 query 必须是**搜索引擎友好的具体查询词**，包含时间限定
+3. ⚠️ **信息多样性原则**：不同的搜索方向应该覆盖不同的信息维度和信息源
+4. ⚠️ **时效性原则**：涉及近期事件时，query 中必须包含具体日期或时间范围（"${now.getFullYear()}年${now.getMonth() + 1}月"）
+5. 对于时事/新闻类需求，应从多个角度切入（国际、科技、经济、社会等），而非只搜一个笼统的"大事件"
 
 可用信息源: ${availableSources.join(", ")}
 
 输出严格 JSON 格式:
 [
   {
-    "query": "搜索查询词",
+    "query": "搜索查询词（browse 模式可为空字符串）",
     "sourceIds": ["source_id_1", "source_id_2"],
-    "rationale": "为什么探索这个方向"
+    "rationale": "为什么探索这个方向",
+    "mode": "search 或 browse"
   }
 ]
+
+mode 说明：
+- "search"（默认）：用关键词搜索，适合有明确方向的探索
+- "browse"：不带关键词，直接浏览信息源的最新/热门内容。适合以下场景：
+  - 用户想了解"最近发生了什么"、"本周大事"等开放式时事需求
+  - 需要发现你事先不知道的新鲜事物
+  - 支持 browse 的信息源有: HackerNews(trending)、RSS(realtime)、GitHub(trending)、Reddit(trending)等
+  - ⚠️ 纯搜索引擎（DuckDuckGo、Web Search）不适合 browse，它们需要关键词
 
 只输出 JSON 数组，不要其他文字。`;
 
@@ -535,11 +554,12 @@ ${knowledgeSection}
     
     try {
       const tasks = JSON.parse(this.extractJSON(response));
-      return tasks.map((t: { query: string; sourceIds: string[]; rationale: string }, i: number) => ({
+      return tasks.map((t: { query: string; sourceIds: string[]; rationale: string; mode?: string }, i: number) => ({
         id: `task_${Date.now()}_${i}`,
-        query: t.query,
+        query: t.query || "",
         sourceIds: t.sourceIds,
         rationale: t.rationale,
+        mode: (t.mode === "browse" ? "browse" : "search") as "search" | "browse",
         round: 1,
         status: "pending" as const,
       }));

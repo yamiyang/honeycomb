@@ -83,6 +83,19 @@ export const hackernewsAdapter: FlowerAdapter = {
     return true;
   },
 
+  async getDetail(url: string): Promise<string | null> {
+    try {
+      const response = await proxyFetch(`https://r.jina.ai/${url}`, {
+        headers: { Accept: "text/plain" },
+      });
+      if (!response.ok) return null;
+      const text = await response.text();
+      return text && text.length > 100 ? text.slice(0, 8000) : null;
+    } catch {
+      return null;
+    }
+  },
+
   async trending(config: SourceConfig, options?: TrendingOptions): Promise<SourceResult[]> {
     const limit = options?.limit || 20;
     const url = `https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=${limit}`;

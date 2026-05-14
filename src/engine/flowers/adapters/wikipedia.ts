@@ -80,6 +80,26 @@ export const wikipediaAdapter: FlowerAdapter = {
     // Wikipedia API 不需要认证
     return true;
   },
+
+  async getDetail(url: string, config: SourceConfig): Promise<string | null> {
+    const match = url.match(/wikipedia\.org\/wiki\/(.+)/);
+    if (!match) return null;
+    const pageTitle = decodeURIComponent(match[1]);
+    const lang = config.language || "en";
+    try {
+      const apiUrl = `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(pageTitle)}&prop=extracts&explaintext=true&format=json&origin=*`;
+      const response = await proxyFetch(apiUrl);
+      if (!response.ok) return null;
+      const data = await response.json();
+      const pages = data.query?.pages;
+      if (!pages) return null;
+      const page = Object.values(pages)[0] as { extract?: string };
+      if (!page?.extract) return null;
+      return page.extract.slice(0, 8000);
+    } catch {
+      return null;
+    }
+  },
 };
 
 // ─── 辅助函数 ───

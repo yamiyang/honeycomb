@@ -84,6 +84,37 @@ export const stackoverflowAdapter: FlowerAdapter = {
     return true;
   },
 
+  async getDetail(url: string): Promise<string | null> {
+    // 从 URL 提取问题 ID
+    const match = url.match(/questions\/(\d+)/);
+    if (!match) return null;
+    const questionId = match[1];
+    try {
+      const apiUrl = `https://api.stackexchange.com/2.3/questions/${questionId}?order=desc&sort=votes&site=stackoverflow&filter=withbody`;
+      const response = await proxyFetch(apiUrl);
+      if (!response.ok) return null;
+      const data = await response.json();
+      const q = data.items?.[0];
+      if (!q) return null;
+
+      let content = `# ${q.title}\n\nTags: ${q.tags?.join(", ")}\nScore: ${q.score} | Answers: ${q.answer_count}\n\n${q.body_markdown || q.body?.replace(/<[^>]+>/g, "") || ""}\n`;
+
+      // 获取回答
+      const ansUrl = `https://api.stackexchange.com/2.3/questions/${questionId}/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody&pagesize=3`;
+      const ansResponse = await proxyFetch(ansUrl);
+      if (ansResponse.ok) {
+        const ansData = await ansResponse.json();
+        const answers = ansData.items || [];
+        for (const a of answers) {
+          content += `\n--- ANSWER (score: ${a.score}${a.is_accepted ? " ✅" : ""}) ---\n${a.body_markdown || a.body?.replace(/<[^>]+>/g, "") || ""}\n`;
+        }
+      }
+      return content.slice(0, 8000);
+    } catch {
+      return null;
+    }
+  },
+
   async trending(_config: SourceConfig, options?: TrendingOptions): Promise<SourceResult[]> {
     const limit = options?.limit || 20;
     const tag = options?.category || "";

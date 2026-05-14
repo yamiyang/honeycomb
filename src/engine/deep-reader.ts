@@ -12,6 +12,7 @@
    ============================================================ */
 
 import { proxyFetch } from "./flowers/proxy-fetch";
+import { flowerField } from "./flowers";
 
 export interface DeepReadResult {
   success: boolean;
@@ -22,13 +23,29 @@ export interface DeepReadResult {
 
 /**
  * 深度阅读一个 URL，返回全文内容
+ * 优先级：适配器原生 getDetail → Jina Reader
  */
 export async function deepRead(
   url: string,
-  maxChars: number = 6000
+  maxChars: number = 6000,
+  sourceId?: string
 ): Promise<DeepReadResult> {
   try {
-    // arXiv 论文：优先用 ar5iv HTML 版
+    // 1. 优先尝试花田适配器的原生 getDetail
+    if (sourceId) {
+      const detail = await flowerField.getDetail(sourceId, url);
+      if (detail && detail.length > 200) {
+        const truncated = detail.length > maxChars;
+        return {
+          success: true,
+          content: truncated ? detail.slice(0, maxChars) + `\n\n[... 原文共 ${detail.length} 字符 ...]` : detail,
+          charCount: detail.length,
+          truncated,
+        };
+      }
+    }
+
+    // 2. arXiv 论文：优先用 ar5iv HTML 版
     const arxivMatch = url.match(/arxiv\.org\/abs\/(.+)/);
     if (arxivMatch) {
       const arxivId = arxivMatch[1];

@@ -27,6 +27,9 @@ export interface FlowerAdapter {
 
   /** 获取热门/趋势（如果支持） */
   trending?(config: SourceConfig, options?: TrendingOptions): Promise<SourceResult[]>;
+
+  /** 深度阅读：根据 URL 获取完整内容（如果支持） */
+  getDetail?(url: string, config: SourceConfig): Promise<string | null>;
 }
 
 export interface SearchOptions {
@@ -156,6 +159,85 @@ class FlowerFieldRegistry {
       console.warn(`[🌸 searchMultiple] All ${sourceIds.length} sources returned empty for "${query}"`);
     }
     return flat;
+  }
+  /**
+   * 深度阅读 — 获取 URL 的完整内容
+   * 优先使用适配器原生的 getDetail，降级到通用 deep-reader
+   */
+  async getDetail(sourceId: string, url: string): Promise<string | null> {
+    const source = this.sources.get(sourceId);
+    if (!source) return null;
+
+    const adapter = this.adapters.get(source.type);
+    if (adapter?.getDetail) {
+      try {
+        const detail = await adapter.getDetail(url, source.config);
+        if (detail && detail.length > 200) return detail;
+      } catch (err) {
+        console.warn(`[🌸 getDetail] Adapter "${source.name}" failed for ${url}:`, err);
+      }
+    }
+
+    // 降级：通用 deep-reader（Jina）
+    return null;
+  }
+
+  /**
+   * 浏览 — 无关键词，获取信息源的最新/热门内容
+   * 调用适配器的 trending() 方法
+   */
+  async browse(sourceId: string, options?: TrendingOptions): Promise<SourceResult[]> {
+    const source = this.sources.get(sourceId);
+    if (!source) throw new Error(`Source not found: ${sourceId}`);
+    if (source.status !== "active") throw new Error(`Source is not active: ${sourceId}`);
+
+    const adapter = this.adapters.get(source.type);
+    if (!adapter) throw new Error(`No adapter for source type: ${source.type}`);
+
+    if (!adapter.trending) {
+      // 该适配器不支持浏览，降级为用空泛 query 搜索
+      console.log(`[🌸 browse] "${source.name}" has no trending, falling back to search`);
+      return this.search(sourceId, "latest news today", options ? { maxResults: options.limit } : undefined);
+    }
+
+    try {
+      const results = await adapter.trending(source.config, options);
+      source.lastUsed = Date.now();
+      return results.map(r => ({
+        ...r,
+        sourceId: source.id,
+        sourceType: source.type,
+        sourceName: source.name,
+      }));
+    } catch (error) {
+      this.updateSourceStatus(sourceId, "error");
+      throw error;
+    }
+  }
+
+  /**
+   * 在多个信息源中并行浏览（获取热门/最新内容）
+   */
+  async browseMultiple(sourceIds: string[], options?: TrendingOptions): Promise<SourceResult[]> {
+    const promises = sourceIds.map(id =>
+      this.browse(id, options).catch(err => {
+        console.warn(`[🌸 browseMultiple] Source "${id}" failed: ${err.message}`);
+        return [] as SourceResult[];
+      })
+    );
+
+    const results = await Promise.all(promises);
+    return results.flat();
+  }
+
+  /**
+   * 获取支持浏览（trending）的活跃信息源
+   */
+  getBrowsableSources(): FlowerSource[] {
+    return this.getActiveSources().filter(s => {
+      const adapter = this.adapters.get(s.type);
+      return adapter?.trending || s.capabilities.includes("trending") || s.capabilities.includes("realtime");
+    });
   }
 }
 
