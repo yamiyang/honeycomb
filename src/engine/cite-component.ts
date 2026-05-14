@@ -7,8 +7,7 @@
  * 用法：<hc-cite source="DuckDuckGo" url="https://..." detail="引用的具体内容">标注文字</hc-cite>
  */
 
-export const HC_CITE_SCRIPT = `
-<style>
+const HC_CITE_STYLE = `
 hc-cite {
   position: relative;
   display: inline-block;
@@ -96,29 +95,37 @@ hc-cite .hc-tip-link:hover {
   text-decoration: underline;
   opacity: 1;
 }
-</style>
-<script>
+`;
+
+// 注意：</script> 被拆成 '</' + 'script>' 防止 HTML 解析器在外层模板字符串中提前截断
+const HC_CITE_JS = `
 class HcCite extends HTMLElement {
   connectedCallback() {
     if (this.dataset.init) return;
     this.dataset.init = '1';
-    const source = this.getAttribute('source') || '未知来源';
-    const url = this.getAttribute('url') || '';
-    const detail = this.getAttribute('detail') || '';
-    const badge = document.createElement('span');
+    var source = this.getAttribute('source') || '未知来源';
+    var url = this.getAttribute('url') || '';
+    var detail = this.getAttribute('detail') || '';
+    var badge = document.createElement('span');
     badge.className = 'hc-badge';
     badge.textContent = 'i';
     this.appendChild(badge);
-    const tip = document.createElement('div');
+    var tip = document.createElement('div');
     tip.className = 'hc-tip';
-    tip.innerHTML = '<div class="hc-tip-src">📎 ' + source + '</div>'
-      + (detail ? '<div class="hc-tip-detail">' + detail.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '')
-      + (url ? '<a class="hc-tip-link" href="' + url + '" target="_blank" rel="noopener">🔗 ' + url + '</a>' : '');
+    var html = '<div class="hc-tip-src">📎 ' + source + '<\\/div>';
+    if (detail) {
+      html += '<div class="hc-tip-detail">' + detail.replace(/</g,'\\u003c').replace(/>/g,'\\u003e') + '<\\/div>';
+    }
+    if (url) {
+      html += '<a class="hc-tip-link" href="' + url + '" target="_blank" rel="noopener">🔗 ' + url + '<\\/a>';
+    }
+    tip.innerHTML = html;
     this.appendChild(tip);
   }
 }
 if (!customElements.get('hc-cite')) {
   customElements.define('hc-cite', HcCite);
 }
-</script>
 `;
+
+export const HC_CITE_SCRIPT = `<style>${HC_CITE_STYLE}</style>\n<script>${HC_CITE_JS}<` + `/script>`;
